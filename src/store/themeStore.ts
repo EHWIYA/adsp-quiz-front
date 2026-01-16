@@ -91,7 +91,7 @@ if (typeof window !== 'undefined') {
   setTimeout(checkAndApplyTheme, 100)
   
   // 시스템 테마 변경 감지
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     const store = useThemeStore.getState()
     if (store.theme === 'system') {
       store.setTheme('system')

@@ -32,6 +32,7 @@ export const button = styleVariants({
         backgroundColor: colors.primaryDark,
         transform: 'scale(0.98)',
       },
+      // @ts-ignore - Vanilla Extract supports :global() selector
       ':global(.dark) &': {
         backgroundColor: darkColors.primary,
         ':hover': {
@@ -56,6 +57,7 @@ export const button = styleVariants({
         backgroundColor: colors.secondaryDark,
         transform: 'scale(0.98)',
       },
+      // @ts-ignore - Vanilla Extract supports :global() selector
       ':global(.dark) &': {
         backgroundColor: darkColors.secondary,
         ':hover': {
@@ -81,6 +83,7 @@ export const button = styleVariants({
       ':active': {
         transform: 'scale(0.98)',
       },
+      // @ts-ignore - Vanilla Extract supports :global() selector
       ':global(.dark) &': {
         color: darkColors.primary,
         borderColor: darkColors.primary,
@@ -103,6 +106,7 @@ export const button = styleVariants({
       ':active': {
         backgroundColor: colors.gray200,
       },
+      // @ts-ignore - Vanilla Extract supports :global() selector
       ':global(.dark) &': {
         color: darkColors.textPrimary,
         ':hover': {

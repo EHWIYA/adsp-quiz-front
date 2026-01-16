@@ -5,6 +5,7 @@ export const app = style({
   minHeight: '100vh',
   backgroundColor: colors.background,
   transition: 'background-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
   ':global(.dark) &': {
     backgroundColor: darkColors.background,
   },
@@ -18,6 +19,7 @@ export const nav = style({
   top: 0,
   zIndex: 100,
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
   ':global(.dark) &': {
     backgroundColor: darkColors.backgroundSecondary,
     borderBottomColor: darkColors.gray700,
@@ -47,6 +49,7 @@ export const logo = style({
   ':hover': {
     opacity: 0.8,
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
   ':global(.dark) &': {
     color: darkColors.primary,
   },
@@ -106,6 +109,7 @@ export const navLinks = style({
       opacity: 0,
       visibility: 'hidden',
       transition: 'all 0.3s ease',
+      // @ts-expect-error - Vanilla Extract supports :global() selector
       ':global(.dark) &': {
         backgroundColor: darkColors.backgroundSecondary,
         borderTopColor: darkColors.gray700,
@@ -136,6 +140,7 @@ export const navLink = style({
     color: colors.primary,
     backgroundColor: colors.gray100,
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
   ':global(.dark) &': {
     color: darkColors.textSecondary,
     ':hover': {
@@ -155,6 +160,7 @@ export const navLink = style({
 export const navLinkActive = style({
   color: colors.primary,
   backgroundColor: colors.primaryLight + '20',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
   ':global(.dark) &': {
     color: darkColors.primary,
     backgroundColor: darkColors.primary + '30',

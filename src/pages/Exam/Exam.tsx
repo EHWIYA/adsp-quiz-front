@@ -19,7 +19,7 @@ const dummyQuiz: Quiz = {
 
 export const Exam = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
-  const [timeRemaining, setTimeRemaining] = useState(90 * 60)
+  const [timeRemaining] = useState(90 * 60)
   const [isRunning, setIsRunning] = useState(true)
 
   const handlePause = () => {

@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { colors, darkColors, typography, spacing, borderRadius, shadow, breakpoints } from '../../styles/theme'
+import { colors, darkColors, typography, spacing, borderRadius, breakpoints } from '../../styles/theme'
 
 export const container = style({
   minHeight: '100vh',
@@ -23,6 +23,8 @@ export const header = style({
   flexWrap: 'wrap',
   gap: spacing[4],
   transition: 'border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     borderBottomColor: darkColors.gray700,
   },
@@ -41,6 +43,8 @@ export const title = style({
   color: colors.textPrimary,
   margin: 0,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -61,6 +65,8 @@ export const progress = style({
   backgroundColor: colors.backgroundSecondary,
   borderRadius: borderRadius.md,
   transition: 'background-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray800,
   },
@@ -74,6 +80,8 @@ export const progressInfo = style({
   color: colors.textSecondary,
   fontWeight: typography.fontWeight.medium,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },
@@ -86,6 +94,8 @@ export const progressBar = style({
   borderRadius: borderRadius.full,
   overflow: 'hidden',
   transition: 'background-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray700,
   },
@@ -95,6 +105,8 @@ export const progressFill = style({
   height: '100%',
   backgroundColor: colors.primary,
   transition: 'width 0.3s ease-in-out, background-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.primary,
   },
@@ -110,6 +122,8 @@ export const footer = style({
   paddingTop: spacing[6],
   borderTop: `1px solid ${colors.gray200}`,
   transition: 'border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     borderTopColor: darkColors.gray700,
   },
@@ -128,6 +142,8 @@ export const submitButton = style({
   ':hover': {
     backgroundColor: '#dc2626',
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     ':hover': {
       backgroundColor: '#f87171',

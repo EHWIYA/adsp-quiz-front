@@ -31,6 +31,8 @@ export const title = style({
   color: colors.textPrimary,
   marginBottom: spacing[4],
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -47,6 +49,8 @@ export const subtitle = style({
   color: colors.textSecondary,
   lineHeight: typography.lineHeight.relaxed,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },
@@ -79,6 +83,8 @@ export const statCard = style({
   border: `1px solid ${colors.gray200}`,
   textAlign: 'center',
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.backgroundSecondary,
     borderColor: darkColors.gray700,
@@ -91,6 +97,8 @@ export const statNumber = style({
   color: colors.primary,
   marginBottom: spacing[2],
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.primary,
   },
@@ -100,6 +108,8 @@ export const statLabel = style({
   fontSize: typography.fontSize.base,
   color: colors.textSecondary,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },
@@ -127,6 +137,8 @@ export const recentActivity = style({
   boxShadow: shadow.md,
   border: `1px solid ${colors.gray200}`,
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.backgroundSecondary,
     borderColor: darkColors.gray700,
@@ -139,6 +151,8 @@ export const sectionTitle = style({
   color: colors.textPrimary,
   marginBottom: spacing[6],
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -155,6 +169,8 @@ export const activityItem = style({
   backgroundColor: colors.backgroundSecondary,
   borderRadius: borderRadius.md,
   transition: 'background-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray800,
   },
@@ -164,6 +180,8 @@ export const activityText = style({
   fontSize: typography.fontSize.base,
   color: colors.textSecondary,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },

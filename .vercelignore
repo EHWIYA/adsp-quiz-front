@@ -1,0 +1,12 @@
+# Docusaurus 문서 사이트 (별도 프로젝트)
+docs-site/
+
+# 문서 폴더 (빌드에 불필요)
+docs/
+
+# 프로젝트 규칙 폴더
+.antigravity/
+
+# 개발 도구 설정
+.vscode/
+.idea/

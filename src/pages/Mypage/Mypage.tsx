@@ -1,5 +1,4 @@
 import * as styles from './Mypage.css'
-import { ResultAnalysis } from '../../components/ResultAnalysis/ResultAnalysis'
 import { Button } from '../../components/Button/Button'
 
 export const Mypage = () => {

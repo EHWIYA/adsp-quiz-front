@@ -9,9 +9,6 @@ interface QuizCardProps {
 }
 
 export const QuizCard = ({ quiz, selectedAnswer, showAnswer = false, onAnswerSelect }: QuizCardProps) => {
-  const isCorrect = showAnswer && selectedAnswer !== undefined && quiz.correctAnswer !== undefined
-    ? selectedAnswer === quiz.correctAnswer
-    : null
 
   return (
     <div className={styles.card}>

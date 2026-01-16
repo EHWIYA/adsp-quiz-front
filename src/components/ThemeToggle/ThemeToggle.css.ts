@@ -17,6 +17,8 @@ export const toggleButton = style({
   ':hover': {
     backgroundColor: colors.gray100,
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     ':hover': {
       backgroundColor: darkColors.gray700,

@@ -8,6 +8,8 @@ export const card = style({
   boxShadow: shadow.md,
   border: `1px solid ${colors.gray200}`,
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.backgroundSecondary,
     borderColor: darkColors.gray700,
@@ -30,6 +32,8 @@ export const category = style({
   borderRadius: borderRadius.full,
   marginBottom: spacing[4],
   transition: 'background-color 0.3s ease, color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray700,
     color: darkColors.textSecondary,
@@ -43,6 +47,8 @@ export const question = style({
   lineHeight: typography.lineHeight.relaxed,
   marginBottom: spacing[6],
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -74,6 +80,8 @@ export const option = style({
   ':disabled': {
     cursor: 'default',
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray800,
     borderColor: darkColors.gray700,
@@ -118,6 +126,8 @@ export const optionNumber = style({
   fontWeight: typography.fontWeight.semibold,
   flexShrink: 0,
   transition: 'background-color 0.3s ease, color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray700,
     color: darkColors.textPrimary,
@@ -129,6 +139,8 @@ export const optionText = style({
   fontSize: typography.fontSize.base,
   lineHeight: typography.lineHeight.normal,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -141,6 +153,8 @@ export const explanation = style({
   borderRadius: borderRadius.md,
   border: `1px solid ${colors.gray200}`,
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.gray800,
     borderColor: darkColors.gray700,
@@ -153,6 +167,8 @@ export const explanationTitle = style({
   color: colors.textSecondary,
   marginBottom: spacing[2],
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },
@@ -163,6 +179,8 @@ export const explanationText = style({
   color: colors.textPrimary,
   lineHeight: typography.lineHeight.relaxed,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },

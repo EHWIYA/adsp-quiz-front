@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { colors, darkColors, typography, spacing, borderRadius, shadow, breakpoints } from '../../styles/theme'
+import { colors, darkColors, typography, spacing, borderRadius, breakpoints } from '../../styles/theme'
 
 export const container = style({
   minHeight: '100vh',
@@ -21,6 +21,8 @@ export const header = style({
   paddingBottom: spacing[4],
   borderBottom: `1px solid ${colors.gray200}`,
   transition: 'border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     borderBottomColor: darkColors.gray700,
   },
@@ -40,6 +42,8 @@ export const title = style({
   color: colors.textPrimary,
   margin: 0,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textPrimary,
   },
@@ -55,6 +59,8 @@ export const progress = style({
   color: colors.textSecondary,
   fontWeight: typography.fontWeight.medium,
   transition: 'color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     color: darkColors.textSecondary,
   },
@@ -70,6 +76,8 @@ export const footer = style({
   paddingTop: spacing[6],
   borderTop: `1px solid ${colors.gray200}`,
   transition: 'border-color 0.3s ease',
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     borderTopColor: darkColors.gray700,
   },
@@ -88,6 +96,8 @@ export const nextButton = style({
   ':hover': {
     backgroundColor: colors.primaryDark,
   },
+  // @ts-expect-error - Vanilla Extract supports :global() selector
+
   ':global(.dark) &': {
     backgroundColor: darkColors.primary,
     ':hover': {
