@@ -15,7 +15,8 @@ export const label = style({
   transition: 'color 0.3s ease',
   selectors: {
     '.dark &': {
-    color: darkColors.textPrimary,
+      color: darkColors.textPrimary,
+    },
   },
 })
 
@@ -44,17 +45,18 @@ export const input = style({
   },
   selectors: {
     '.dark &': {
-    color: darkColors.textPrimary,
-    backgroundColor: darkColors.backgroundSecondary,
-    borderColor: darkColors.gray600,
-    '::placeholder': {
+      color: darkColors.textPrimary,
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray600,
+    },
+    '.dark &::placeholder': {
       color: darkColors.textTertiary,
     },
-    ':focus': {
+    '.dark &:focus': {
       borderColor: darkColors.primary,
       boxShadow: `0 0 0 3px ${darkColors.primary}20`,
     },
-    ':disabled': {
+    '.dark &:disabled': {
       backgroundColor: darkColors.gray700,
     },
   },

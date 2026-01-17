@@ -9,7 +9,7 @@ import { useTimerStore } from '../../store/timerStore'
 
 export const Exam = () => {
   const navigate = useNavigate()
-  const { examSessionId, currentQuestionIndex, answers, startExam, addAnswer, resetExam } = useExamStore()
+  const { examSessionId, answers, startExam, addAnswer, resetExam } = useExamStore()
   const { seconds, isRunning, start, pause, resume, tick } = useTimerStore()
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
@@ -85,7 +85,7 @@ export const Exam = () => {
   const handleSubmit = () => {
     if (!examSessionId || !startExamMutation.data) return
 
-    const allAnswers = startExamMutation.data.quizzes.map((quiz, index) => {
+    const allAnswers = startExamMutation.data.quizzes.map((quiz) => {
       const answer = answers.find((a) => a.quizId === quiz.id)
       return {
         quizId: quiz.id,

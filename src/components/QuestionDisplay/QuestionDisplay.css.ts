@@ -34,13 +34,13 @@ export const submitButton = style({
   },
   selectors: {
     '.dark &': {
-    backgroundColor: darkColors.primary,
-    ':hover': {
+      backgroundColor: darkColors.primary,
+    },
+    '.dark &:hover': {
       backgroundColor: darkColors.primaryDark,
     },
-    ':disabled': {
+    '.dark &:disabled': {
       backgroundColor: darkColors.primary,
     },
   },
-
-  },})
+})

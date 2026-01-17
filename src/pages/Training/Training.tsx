@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import * as styles from './Training.css'
 import { QuestionDisplay } from '../../components/QuestionDisplay/QuestionDisplay'
 import { useGenerateQuiz } from '../../api/quiz'
@@ -8,7 +7,6 @@ import type { Quiz } from '../../components/QuizCard/QuizCard.types'
 import type { GenerateQuizRequest } from '../../api/types'
 
 export const Training = () => {
-  const navigate = useNavigate()
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [showAnswer, setShowAnswer] = useState(false)

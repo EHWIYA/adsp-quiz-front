@@ -26,6 +26,6 @@ export const useSubjects = () => {
       }
     },
     staleTime: 1000 * 60 * 5, // 5분간 캐시 유지
-    cacheTime: 1000 * 60 * 10, // 10분간 캐시 보관
+    gcTime: 1000 * 60 * 10, // 10분간 캐시 보관
   })
 }

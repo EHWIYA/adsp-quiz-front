@@ -171,13 +171,13 @@ export const textarea = style({
       color: darkColors.textPrimary,
       backgroundColor: darkColors.backgroundSecondary,
       borderColor: darkColors.gray600,
-      '::placeholder': {
-        color: darkColors.textTertiary,
-      },
-      ':focus': {
-        borderColor: darkColors.primary,
-        boxShadow: `0 0 0 3px ${darkColors.primary}20`,
-      },
+    },
+    '.dark &::placeholder': {
+      color: darkColors.textTertiary,
+    },
+    '.dark &:focus': {
+      borderColor: darkColors.primary,
+      boxShadow: `0 0 0 3px ${darkColors.primary}20`,
     },
   },
 })
@@ -203,10 +203,10 @@ export const select = style({
       color: darkColors.textPrimary,
       backgroundColor: darkColors.backgroundSecondary,
       borderColor: darkColors.gray600,
-      ':focus': {
-        borderColor: darkColors.primary,
-        boxShadow: `0 0 0 3px ${darkColors.primary}20`,
-      },
+    },
+    '.dark &:focus': {
+      borderColor: darkColors.primary,
+      boxShadow: `0 0 0 3px ${darkColors.primary}20`,
     },
   },
 })
@@ -321,10 +321,10 @@ export const retryButton = style({
     '.dark &': {
       color: darkColors.error,
       borderColor: darkColors.error,
-      ':hover': {
-        backgroundColor: darkColors.error,
-        color: darkColors.white,
-      },
+    },
+    '.dark &:hover': {
+      backgroundColor: darkColors.error,
+      color: darkColors.white,
     },
   },
 })

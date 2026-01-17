@@ -15,7 +15,8 @@ export const overlay = style({
   padding: spacing[4],
   selectors: {
     '.dark &': {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    },
   },
 })
 
@@ -32,7 +33,8 @@ export const modal = style({
   transition: 'background-color 0.3s ease',
   selectors: {
     '.dark &': {
-    backgroundColor: darkColors.backgroundSecondary,
+      backgroundColor: darkColors.backgroundSecondary,
+    },
   },
 })
 
@@ -45,7 +47,8 @@ export const header = style({
   transition: 'border-color 0.3s ease',
   selectors: {
     '.dark &': {
-    borderBottomColor: darkColors.gray700,
+      borderBottomColor: darkColors.gray700,
+    },
   },
 })
 
@@ -57,7 +60,8 @@ export const title = style({
   transition: 'color 0.3s ease',
   selectors: {
     '.dark &': {
-    color: darkColors.textPrimary,
+      color: darkColors.textPrimary,
+    },
   },
 })
 
