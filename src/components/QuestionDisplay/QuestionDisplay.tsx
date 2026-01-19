@@ -20,7 +20,6 @@ export const QuestionDisplay = ({
       <QuizCard
         quiz={quiz}
         selectedAnswer={selectedAnswer}
-        showAnswer={showAnswer}
         onAnswerSelect={onAnswerSelect}
       />
       {!showAnswer && onAnswerSelect && (
