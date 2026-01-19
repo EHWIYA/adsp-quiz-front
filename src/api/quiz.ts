@@ -3,6 +3,8 @@ import { apiClient } from './client'
 import type {
   GenerateQuizRequest,
   GenerateQuizResponse,
+  GenerateStudyQuizRequest,
+  GenerateStudyQuizResponse,
   Quiz,
   QuizResponse,
 } from './types'
@@ -65,5 +67,30 @@ export const useQuiz = (quizId: string | null) => {
     },
     enabled: !!quizId,
     staleTime: 1000 * 60 * 5, // 5분
+  })
+}
+
+// 학습 모드 문제 생성 Hook (2026-01-19 추가)
+export const useGenerateStudyQuiz = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (data: GenerateStudyQuizRequest): Promise<Quiz[]> => {
+      const response = await apiClient.post<GenerateStudyQuizResponse>(
+        '/api/v1/quiz/generate-study',
+        {
+          sub_topic_id: data.sub_topic_id,
+          quiz_count: data.quiz_count || 10,
+        }
+      )
+      // 백엔드 응답(QuizResponse[])을 프론트엔드 형식(Quiz[])으로 변환
+      return response.quizzes.map((quizResponse) => transformQuizResponse(quizResponse))
+    },
+    onSuccess: (quizzes) => {
+      // 생성된 문제들을 캐시에 저장
+      quizzes.forEach((quiz) => {
+        queryClient.setQueryData(['quiz', quiz.id], quiz)
+      })
+    },
   })
 }

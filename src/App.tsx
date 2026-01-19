@@ -5,6 +5,7 @@ import { Training } from './pages/Training/Training'
 import { Exam } from './pages/Exam/Exam'
 import { ExamResult } from './pages/ExamResult/ExamResult'
 import { Mypage } from './pages/Mypage/Mypage'
+import { Admin } from './pages/Admin/Admin'
 import { useThemeStore } from './store/themeStore'
 import { ThemeToggle } from './components/ThemeToggle/ThemeToggle'
 import * as styles from './App.css'
@@ -62,6 +63,13 @@ const Navigation = () => {
           >
             마이페이지
           </Link>
+          <Link
+            to="/admin"
+            className={`${styles.navLink} ${isActive('/admin') ? styles.navLinkActive : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            관리
+          </Link>
         </div>
       </div>
     </nav>
@@ -104,6 +112,7 @@ function App() {
             <Route path="/exam" element={<Exam />} />
             <Route path="/exam/result/:examSessionId" element={<ExamResult />} />
             <Route path="/mypage" element={<Mypage />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
       </div>

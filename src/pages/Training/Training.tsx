@@ -1,44 +1,56 @@
 import { useState, useEffect } from 'react'
 import * as styles from './Training.css'
 import { QuestionDisplay } from '../../components/QuestionDisplay/QuestionDisplay'
-import { useGenerateQuiz } from '../../api/quiz'
-import { useSubjects } from '../../api/subjects'
+import { useGenerateStudyQuiz } from '../../api/quiz'
+import { useSubjects, useMainTopics, useSubTopics } from '../../api/subjects'
 import type { Quiz } from '../../components/QuizCard/QuizCard.types'
-import type { GenerateQuizRequest, ApiError } from '../../api/types'
+import type { ApiError } from '../../api/types'
 
 export const Training = () => {
-  const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null)
+  const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [showAnswer, setShowAnswer] = useState(false)
-  const [questionNumber, setQuestionNumber] = useState(1)
   
-  const [source, setSource] = useState<'youtube' | 'text'>('text')
-  const [content, setContent] = useState('ADsP 데이터 분석 준전문가 시험 문제를 생성해주세요.')
-  const [subjectId, setSubjectId] = useState<string>('')
+  // 3단계 분류 선택 상태
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
+  const [selectedMainTopicId, setSelectedMainTopicId] = useState<number | null>(null)
+  const [selectedSubTopicId, setSelectedSubTopicId] = useState<number | null>(null)
   
-  const generateQuizMutation = useGenerateQuiz()
+  const generateStudyQuizMutation = useGenerateStudyQuiz()
   const { data: subjects, isLoading: isLoadingSubjects, isError: isSubjectsError } = useSubjects()
+  const { data: mainTopicsData, isLoading: isLoadingMainTopics } = useMainTopics(selectedSubjectId)
+  const { data: subTopicsData, isLoading: isLoadingSubTopics } = useSubTopics(selectedMainTopicId)
+
+  // 과목 선택 시 주요항목 초기화
+  useEffect(() => {
+    if (selectedSubjectId) {
+      setSelectedMainTopicId(null)
+      setSelectedSubTopicId(null)
+    }
+  }, [selectedSubjectId])
+
+  // 주요항목 선택 시 세부항목 초기화
+  useEffect(() => {
+    if (selectedMainTopicId) {
+      setSelectedSubTopicId(null)
+    }
+  }, [selectedMainTopicId])
 
   const handleStart = () => {
-    if (!content.trim()) {
+    if (!selectedSubTopicId) {
       return
     }
 
-    const requestData: GenerateQuizRequest = {
-      source,
-      content: content.trim(),
-    }
-
-    if (subjectId) {
-      requestData.subjectId = subjectId
-    }
-
-    generateQuizMutation.mutate(
-      requestData,
+    generateStudyQuizMutation.mutate(
       {
-        onSuccess: (quiz) => {
-          setCurrentQuiz(quiz)
-          setQuestionNumber(1)
+        sub_topic_id: selectedSubTopicId,
+        quiz_count: 10,
+      },
+      {
+        onSuccess: (generatedQuizzes) => {
+          setQuizzes(generatedQuizzes)
+          setCurrentQuizIndex(0)
           setSelectedAnswer(undefined)
           setShowAnswer(false)
         },
@@ -52,55 +64,31 @@ export const Training = () => {
   }
 
   const handleNext = () => {
-    if (!content.trim()) {
-      return
+    if (currentQuizIndex < quizzes.length - 1) {
+      setCurrentQuizIndex(currentQuizIndex + 1)
+      setSelectedAnswer(undefined)
+      setShowAnswer(false)
     }
-
-    const requestData: GenerateQuizRequest = {
-      source,
-      content: content.trim(),
-    }
-
-    if (subjectId) {
-      requestData.subjectId = subjectId
-    }
-
-    generateQuizMutation.mutate(
-      requestData,
-      {
-        onSuccess: (quiz) => {
-          setCurrentQuiz(quiz)
-          setQuestionNumber(questionNumber + 1)
-          setSelectedAnswer(undefined)
-          setShowAnswer(false)
-        },
-      }
-    )
   }
 
   // 503 에러 자동 재시도 (7초 후)
   useEffect(() => {
-    const error = generateQuizMutation.error as ApiError | undefined
-    if (error?.status === 503 && !generateQuizMutation.isPending) {
+    const error = generateStudyQuizMutation.error as ApiError | undefined
+    if (error?.status === 503 && !generateStudyQuizMutation.isPending && selectedSubTopicId) {
       const retryTimer = setTimeout(() => {
-        if (content.trim()) {
-          const requestData: GenerateQuizRequest = {
-            source,
-            content: content.trim(),
-          }
-          if (subjectId) {
-            requestData.subjectId = subjectId
-          }
-          generateQuizMutation.mutate(requestData)
-        }
+        generateStudyQuizMutation.mutate({
+          sub_topic_id: selectedSubTopicId,
+          quiz_count: 10,
+        })
       }, 7000) // 7초 후 자동 재시도
 
       return () => clearTimeout(retryTimer)
     }
-  }, [generateQuizMutation.error, generateQuizMutation.isPending, content, source, subjectId])
+  }, [generateStudyQuizMutation.error, generateStudyQuizMutation.isPending, selectedSubTopicId])
 
-  if (!currentQuiz) {
-    const error = generateQuizMutation.error as ApiError | undefined
+  // 문제가 없으면 시작 화면 표시
+  if (quizzes.length === 0) {
+    const error = generateStudyQuizMutation.error as ApiError | undefined
     const is503Error = error?.status === 503
 
     return (
@@ -110,66 +98,22 @@ export const Training = () => {
         </div>
         <div className={styles.startSection}>
           <div className={styles.form}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>문제 생성 방식</label>
-              <div className={styles.radioGroup}>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    value="text"
-                    checked={source === 'text'}
-                    onChange={(e) => setSource(e.target.value as 'text')}
-                    className={styles.radio}
-                  />
-                  <span>텍스트</span>
-                </label>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    value="youtube"
-                    checked={source === 'youtube'}
-                    onChange={(e) => setSource(e.target.value as 'youtube')}
-                    className={styles.radio}
-                  />
-                  <span>YouTube URL</span>
-                </label>
-              </div>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label} htmlFor="content">
-                {source === 'text' ? '문제 생성 내용' : 'YouTube URL'}
-              </label>
-              <textarea
-                id="content"
-                className={styles.textarea}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={
-                  source === 'text'
-                    ? 'ADsP 데이터 분석 준전문가 시험 문제를 생성해주세요.'
-                    : 'https://www.youtube.com/watch?v=...'
-                }
-                rows={source === 'text' ? 4 : 2}
-              />
-            </div>
-
+            {/* 과목 선택 */}
             <div className={styles.formGroup}>
               <label className={styles.label} htmlFor="subjectId">
-                과목 선택 (선택사항)
+                과목 선택
               </label>
               <select
                 id="subjectId"
                 className={styles.select}
-                value={subjectId}
-                onChange={(e) => setSubjectId(e.target.value)}
+                value={selectedSubjectId || ''}
+                onChange={(e) => setSelectedSubjectId(e.target.value ? Number(e.target.value) : null)}
                 disabled={isLoadingSubjects || isSubjectsError}
               >
-                <option value="">과목 선택 안 함</option>
+                <option value="">과목을 선택하세요</option>
                 {subjects?.map((subject) => (
-                  <option key={subject.id} value={String(subject.id)}>
+                  <option key={subject.id} value={subject.id}>
                     {subject.name}
-                    {subject.quiz_count !== null && ` (${subject.quiz_count}문제)`}
                   </option>
                 ))}
               </select>
@@ -180,6 +124,58 @@ export const Training = () => {
                 <p className={styles.errorText}>과목 목록을 불러올 수 없습니다.</p>
               )}
             </div>
+
+            {/* 주요항목 선택 */}
+            {selectedSubjectId && (
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="mainTopicId">
+                  주요항목 선택
+                </label>
+                <select
+                  id="mainTopicId"
+                  className={styles.select}
+                  value={selectedMainTopicId || ''}
+                  onChange={(e) => setSelectedMainTopicId(e.target.value ? Number(e.target.value) : null)}
+                  disabled={isLoadingMainTopics || !mainTopicsData}
+                >
+                  <option value="">주요항목을 선택하세요</option>
+                  {mainTopicsData?.main_topics.map((mainTopic) => (
+                    <option key={mainTopic.id} value={mainTopic.id}>
+                      {mainTopic.name}
+                    </option>
+                  ))}
+                </select>
+                {isLoadingMainTopics && (
+                  <p className={styles.helperText}>주요항목 목록을 불러오는 중...</p>
+                )}
+              </div>
+            )}
+
+            {/* 세부항목 선택 */}
+            {selectedMainTopicId && (
+              <div className={styles.formGroup}>
+                <label className={styles.label} htmlFor="subTopicId">
+                  세부항목 선택
+                </label>
+                <select
+                  id="subTopicId"
+                  className={styles.select}
+                  value={selectedSubTopicId || ''}
+                  onChange={(e) => setSelectedSubTopicId(e.target.value ? Number(e.target.value) : null)}
+                  disabled={isLoadingSubTopics || !subTopicsData}
+                >
+                  <option value="">세부항목을 선택하세요</option>
+                  {subTopicsData?.sub_topics.map((subTopic) => (
+                    <option key={subTopic.id} value={subTopic.id}>
+                      {subTopic.name}
+                    </option>
+                  ))}
+                </select>
+                {isLoadingSubTopics && (
+                  <p className={styles.helperText}>세부항목 목록을 불러오는 중...</p>
+                )}
+              </div>
+            )}
 
             {error && (
               <div className={styles.error}>
@@ -196,16 +192,12 @@ export const Training = () => {
                 <button
                   className={styles.retryButton}
                   onClick={() => {
-                    generateQuizMutation.reset()
-                    if (content.trim()) {
-                      const requestData: GenerateQuizRequest = {
-                        source,
-                        content: content.trim(),
-                      }
-                      if (subjectId) {
-                        requestData.subjectId = subjectId
-                      }
-                      generateQuizMutation.mutate(requestData)
+                    generateStudyQuizMutation.reset()
+                    if (selectedSubTopicId) {
+                      generateStudyQuizMutation.mutate({
+                        sub_topic_id: selectedSubTopicId,
+                        quiz_count: 10,
+                      })
                     }
                   }}
                 >
@@ -217,9 +209,9 @@ export const Training = () => {
             <button
               className={styles.startButton}
               onClick={handleStart}
-              disabled={generateQuizMutation.isPending || !content.trim()}
+              disabled={generateStudyQuizMutation.isPending || !selectedSubTopicId}
             >
-              {generateQuizMutation.isPending ? '문제 생성 중...' : '학습 시작하기'}
+              {generateStudyQuizMutation.isPending ? '문제 생성 중...' : '학습 시작하기'}
             </button>
           </div>
         </div>
@@ -227,12 +219,17 @@ export const Training = () => {
     )
   }
 
+  // 문제 풀이 화면
+  const currentQuiz = quizzes[currentQuizIndex]
+  const totalQuestions = quizzes.length
+  const progress = ((currentQuizIndex + 1) / totalQuestions) * 100
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>학습 모드</h1>
         <div className={styles.progress}>
-          문제 {questionNumber} / 10
+          문제 {currentQuizIndex + 1} / {totalQuestions}
         </div>
       </div>
 
@@ -247,20 +244,36 @@ export const Training = () => {
 
       {showAnswer && (
         <div className={styles.footer}>
-          {generateQuizMutation.isError && (
+          {generateStudyQuizMutation.isError && (
             <div className={styles.error}>
               <p className={styles.errorMessage}>
-                {(generateQuizMutation.error as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
+                {(generateStudyQuizMutation.error as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
               </p>
             </div>
           )}
-          <button
-            className={styles.nextButton}
-            onClick={handleNext}
-            disabled={generateQuizMutation.isPending || !content.trim()}
-          >
-            {generateQuizMutation.isPending ? '다음 문제 생성 중...' : '다음 문제'}
-          </button>
+          {currentQuizIndex < totalQuestions - 1 ? (
+            <button
+              className={styles.nextButton}
+              onClick={handleNext}
+            >
+              다음 문제
+            </button>
+          ) : (
+            <button
+              className={styles.startButton}
+              onClick={() => {
+                setQuizzes([])
+                setCurrentQuizIndex(0)
+                setSelectedAnswer(undefined)
+                setShowAnswer(false)
+                setSelectedSubjectId(null)
+                setSelectedMainTopicId(null)
+                setSelectedSubTopicId(null)
+              }}
+            >
+              다시 시작
+            </button>
+          )}
         </div>
       )}
     </div>

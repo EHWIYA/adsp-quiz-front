@@ -78,6 +78,63 @@ export interface Subject {
   created_at: string
 }
 
+// 과목 분류 세분화 타입 (2026-01-19 추가)
+export interface MainTopic {
+  id: number
+  name: string
+  description: string | null
+  subject_id: number
+}
+
+export interface SubTopic {
+  id: number
+  name: string
+  description: string | null
+  main_topic_id: number
+}
+
+export interface MainTopicsResponse {
+  main_topics: MainTopic[]
+  total: number
+}
+
+export interface SubTopicsResponse {
+  sub_topics: SubTopic[]
+  total: number
+}
+
+// 학습 모드 문제 생성 타입 (2026-01-19 추가)
+export interface GenerateStudyQuizRequest {
+  sub_topic_id: number
+  quiz_count?: number // 기본값: 10, 최대: 50
+}
+
+export interface GenerateStudyQuizResponse {
+  quizzes: QuizResponse[]
+  total_count: number
+}
+
+// 핵심 정보 관리 타입 (2026-01-19 추가)
+export interface CoreContent {
+  id: number
+  sub_topic_id: number
+  content: string
+  source_type: 'text' | 'youtube_url'
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateCoreContentRequest {
+  sub_topic_id: number
+  content: string
+  source_type: 'text' | 'youtube_url'
+}
+
+export interface UpdateCoreContentRequest {
+  content: string
+  source_type?: 'text' | 'youtube_url'
+}
+
 export interface ApiError {
   message: string
   code?: string
