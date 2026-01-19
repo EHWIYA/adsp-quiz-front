@@ -104,6 +104,7 @@ class ApiClient {
     return {
       message: errorMessage || '알 수 없는 오류가 발생했습니다.',
       code: error.code || `HTTP_${status}`,
+      status,
       details: error.details || error.detail,
     }
   }

@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css'
+import { style, globalStyle } from '@vanilla-extract/css'
 import { colors, darkColors, typography, spacing, borderRadius, shadow, breakpoints } from '../../styles/theme'
 
 export const card = style({
@@ -82,11 +82,12 @@ export const option = style({
   },
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray800,
-      borderColor: darkColors.gray700,
+      backgroundColor: darkColors.gray200,
+      borderColor: darkColors.gray300,
+      color: darkColors.textPrimary,
     },
     '.dark &:hover': {
-      backgroundColor: darkColors.gray700,
+      backgroundColor: darkColors.gray300,
       borderColor: darkColors.primary,
     },
   },
@@ -99,18 +100,39 @@ export const optionSelected = style({
   ':hover': {
     backgroundColor: colors.primaryLight,
   },
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.primary,
+      borderColor: darkColors.primaryLight,
+      color: darkColors.textPrimary,
+    },
+  },
 })
 
 export const optionCorrect = style({
   backgroundColor: colors.success,
   borderColor: colors.success,
   color: colors.white,
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.success,
+      borderColor: darkColors.success,
+      color: darkColors.textPrimary,
+    },
+  },
 })
 
 export const optionWrong = style({
   backgroundColor: colors.error,
   borderColor: colors.error,
   color: colors.white,
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.error,
+      borderColor: darkColors.error,
+      color: darkColors.textPrimary,
+    },
+  },
 })
 
 export const optionNumber = style({
@@ -128,16 +150,33 @@ export const optionNumber = style({
   transition: 'background-color 0.3s ease, color 0.3s ease',
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray700,
+      backgroundColor: darkColors.gray300,
       color: darkColors.textPrimary,
     },
   },
+})
+
+// 다크 모드에서 선택/정답/오답 상태의 번호 스타일
+globalStyle('.dark .optionSelected .optionNumber', {
+  backgroundColor: darkColors.primaryDark,
+  color: darkColors.textPrimary,
+})
+
+globalStyle('.dark .optionCorrect .optionNumber', {
+  backgroundColor: darkColors.success,
+  color: darkColors.textPrimary,
+})
+
+globalStyle('.dark .optionWrong .optionNumber', {
+  backgroundColor: darkColors.error,
+  color: darkColors.textPrimary,
 })
 
 export const optionText = style({
   flex: 1,
   fontSize: typography.fontSize.base,
   lineHeight: typography.lineHeight.normal,
+  color: colors.textPrimary,
   transition: 'color 0.3s ease',
   selectors: {
     '.dark &': {
@@ -155,8 +194,8 @@ export const explanation = style({
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray800,
-      borderColor: darkColors.gray700,
+      backgroundColor: darkColors.gray200,
+      borderColor: darkColors.gray300,
     },
   },
 })

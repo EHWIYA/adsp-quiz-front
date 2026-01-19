@@ -1,3 +1,19 @@
+// 백엔드 응답 형식 (snake_case)
+export interface QuizResponse {
+  id: number
+  subject_id: number
+  question: string
+  options: Array<{
+    index: number
+    text: string
+  }>
+  correct_answer: number
+  explanation: string
+  source_url: string
+  created_at: string
+}
+
+// 프론트엔드에서 사용하는 Quiz 타입 (camelCase)
 export interface Quiz {
   id: string
   question: string
@@ -14,9 +30,8 @@ export interface GenerateQuizRequest {
   subjectId?: string
 }
 
-export interface GenerateQuizResponse {
-  quiz: Quiz
-}
+// 백엔드는 Quiz 객체를 직접 반환 (중첩된 quiz 객체 없음)
+export type GenerateQuizResponse = QuizResponse
 
 export interface StartExamRequest {
   subjectId?: number
@@ -66,5 +81,6 @@ export interface Subject {
 export interface ApiError {
   message: string
   code?: string
+  status?: number
   details?: unknown
 }

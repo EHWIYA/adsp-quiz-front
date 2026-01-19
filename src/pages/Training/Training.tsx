@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import * as styles from './Training.css'
 import { QuestionDisplay } from '../../components/QuestionDisplay/QuestionDisplay'
 import { useGenerateQuiz } from '../../api/quiz'
 import { useSubjects } from '../../api/subjects'
 import type { Quiz } from '../../components/QuizCard/QuizCard.types'
-import type { GenerateQuizRequest } from '../../api/types'
+import type { GenerateQuizRequest, ApiError } from '../../api/types'
 
 export const Training = () => {
   const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null)
@@ -36,8 +36,8 @@ export const Training = () => {
     generateQuizMutation.mutate(
       requestData,
       {
-        onSuccess: (data) => {
-          setCurrentQuiz(data.quiz)
+        onSuccess: (quiz) => {
+          setCurrentQuiz(quiz)
           setQuestionNumber(1)
           setSelectedAnswer(undefined)
           setShowAnswer(false)
@@ -68,8 +68,8 @@ export const Training = () => {
     generateQuizMutation.mutate(
       requestData,
       {
-        onSuccess: (data) => {
-          setCurrentQuiz(data.quiz)
+        onSuccess: (quiz) => {
+          setCurrentQuiz(quiz)
           setQuestionNumber(questionNumber + 1)
           setSelectedAnswer(undefined)
           setShowAnswer(false)
@@ -78,8 +78,30 @@ export const Training = () => {
     )
   }
 
+  // 503 에러 자동 재시도 (7초 후)
+  useEffect(() => {
+    const error = generateQuizMutation.error as ApiError | undefined
+    if (error?.status === 503 && !generateQuizMutation.isPending) {
+      const retryTimer = setTimeout(() => {
+        if (content.trim()) {
+          const requestData: GenerateQuizRequest = {
+            source,
+            content: content.trim(),
+          }
+          if (subjectId) {
+            requestData.subjectId = subjectId
+          }
+          generateQuizMutation.mutate(requestData)
+        }
+      }, 7000) // 7초 후 자동 재시도
+
+      return () => clearTimeout(retryTimer)
+    }
+  }, [generateQuizMutation.error, generateQuizMutation.isPending, content, source, subjectId])
+
   if (!currentQuiz) {
-    const error = generateQuizMutation.error as { message?: string; code?: string } | undefined
+    const error = generateQuizMutation.error as ApiError | undefined
+    const is503Error = error?.status === 503
 
     return (
       <div className={styles.container}>
@@ -161,10 +183,31 @@ export const Training = () => {
 
             {error && (
               <div className={styles.error}>
-                <p className={styles.errorMessage}>{error.message || '문제 생성 중 오류가 발생했습니다.'}</p>
+                <p className={styles.errorMessage}>
+                  {is503Error
+                    ? error.message || 'Gemini API가 일시적으로 과부하 상태입니다. 잠시 후 다시 시도해주세요.'
+                    : error.message || '문제 생성 중 오류가 발생했습니다.'}
+                </p>
+                {is503Error && (
+                  <p className={styles.helperText} style={{ marginTop: '8px', fontSize: '0.9em' }}>
+                    7초 후 자동으로 재시도합니다...
+                  </p>
+                )}
                 <button
                   className={styles.retryButton}
-                  onClick={() => generateQuizMutation.reset()}
+                  onClick={() => {
+                    generateQuizMutation.reset()
+                    if (content.trim()) {
+                      const requestData: GenerateQuizRequest = {
+                        source,
+                        content: content.trim(),
+                      }
+                      if (subjectId) {
+                        requestData.subjectId = subjectId
+                      }
+                      generateQuizMutation.mutate(requestData)
+                    }
+                  }}
                 >
                   다시 시도
                 </button>
