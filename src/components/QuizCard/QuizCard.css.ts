@@ -113,11 +113,19 @@ export const optionCorrect = style({
   backgroundColor: colors.success,
   borderColor: colors.success,
   color: colors.white,
+  ':hover': {
+    backgroundColor: colors.success,
+    borderColor: colors.success,
+  },
   selectors: {
     '.dark &': {
       backgroundColor: darkColors.success,
       borderColor: darkColors.success,
       color: darkColors.textPrimary,
+    },
+    '.dark &:hover': {
+      backgroundColor: darkColors.success,
+      borderColor: darkColors.success,
     },
   },
 })
@@ -126,11 +134,19 @@ export const optionWrong = style({
   backgroundColor: colors.error,
   borderColor: colors.error,
   color: colors.white,
+  ':hover': {
+    backgroundColor: colors.error,
+    borderColor: colors.error,
+  },
   selectors: {
     '.dark &': {
       backgroundColor: darkColors.error,
       borderColor: darkColors.error,
       color: darkColors.textPrimary,
+    },
+    '.dark &:hover': {
+      backgroundColor: darkColors.error,
+      borderColor: darkColors.error,
     },
   },
 })
@@ -154,6 +170,22 @@ export const optionNumber = style({
       color: darkColors.textPrimary,
     },
   },
+})
+
+// 라이트 모드에서 선택/정답/오답 상태의 번호 스타일
+globalStyle('.optionSelected .optionNumber', {
+  backgroundColor: colors.primaryDark,
+  color: colors.white,
+})
+
+globalStyle('.optionCorrect .optionNumber', {
+  backgroundColor: colors.success,
+  color: colors.white,
+})
+
+globalStyle('.optionWrong .optionNumber', {
+  backgroundColor: colors.error,
+  color: colors.white,
 })
 
 // 다크 모드에서 선택/정답/오답 상태의 번호 스타일
