@@ -65,7 +65,7 @@ export const useDeleteCoreContent = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: async ({ id, subTopicId }: { id: number; subTopicId: number }): Promise<void> => {
+    mutationFn: async ({ id }: { id: number; subTopicId: number }): Promise<void> => {
       await apiClient.delete(`/api/v1/admin/core-content/${id}`)
     },
     onSuccess: (_data, variables) => {

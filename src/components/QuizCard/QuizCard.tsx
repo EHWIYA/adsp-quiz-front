@@ -4,11 +4,10 @@ import * as styles from './QuizCard.css'
 interface QuizCardProps {
   quiz: Quiz
   selectedAnswer?: number
-  showAnswer?: boolean
   onAnswerSelect?: (answerIndex: number) => void
 }
 
-export const QuizCard = ({ quiz, selectedAnswer, showAnswer = false, onAnswerSelect }: QuizCardProps) => {
+export const QuizCard = ({ quiz, selectedAnswer, onAnswerSelect }: QuizCardProps) => {
 
   return (
     <div className={styles.card}>

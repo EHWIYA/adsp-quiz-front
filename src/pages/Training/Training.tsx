@@ -222,7 +222,6 @@ export const Training = () => {
   // 문제 풀이 화면
   const currentQuiz = quizzes[currentQuizIndex]
   const totalQuestions = quizzes.length
-  const progress = ((currentQuizIndex + 1) / totalQuestions) * 100
 
   return (
     <div className={styles.container}>
