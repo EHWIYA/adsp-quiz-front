@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from './client'
 import type {
   CoreContent,
+  SubTopicCoreContentResponse,
   CreateCoreContentRequest,
   UpdateCoreContentRequest,
   UpdateCoreContentByPathRequest,
@@ -11,9 +12,9 @@ import type {
 export const useCoreContent = (subTopicId: number | null) => {
   return useQuery({
     queryKey: ['core-content', subTopicId],
-    queryFn: async (): Promise<CoreContent> => {
+    queryFn: async (): Promise<SubTopicCoreContentResponse> => {
       if (!subTopicId) throw new Error('Sub Topic ID is required')
-      return await apiClient.get<CoreContent>(`/api/v1/core-content/${subTopicId}`)
+      return await apiClient.get<SubTopicCoreContentResponse>(`/api/v1/core-content/${subTopicId}`)
     },
     enabled: !!subTopicId,
     staleTime: 1000 * 60 * 5, // 5분간 캐시 유지

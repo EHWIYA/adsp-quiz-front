@@ -19,7 +19,6 @@ export const Admin = () => {
   
   // 핵심 정보 입력 상태
   const [content, setContent] = useState('')
-  const [sourceType, setSourceType] = useState<'text' | 'youtube_url'>('text')
   const [isEditMode, setIsEditMode] = useState(false)
 
   // 하드코딩된 분류 데이터 사용 (2026-01-20 변경)
@@ -62,13 +61,11 @@ export const Admin = () => {
   // 세부항목 선택 시 핵심 정보 로드
   useEffect(() => {
     if (coreContent && selectedSubTopicId) {
-      setContent(coreContent.content)
-      setSourceType(coreContent.source_type)
+      setContent(coreContent.core_content || '')
       setIsEditMode(true)
     } else if (selectedSubTopicId && !isLoadingCoreContent && isCoreContentError) {
       // 핵심 정보가 없는 경우 (404 에러)
       setContent('')
-      setSourceType('text')
       setIsEditMode(false)
     }
   }, [coreContent, selectedSubTopicId, isLoadingCoreContent, isCoreContentError])
@@ -207,32 +204,6 @@ export const Admin = () => {
               {isLoadingCoreContent && (
                 <p className={styles.helperText}>핵심 정보를 불러오는 중...</p>
               )}
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>정보 유형</label>
-              <div className={styles.radioGroup}>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    value="text"
-                    checked={sourceType === 'text'}
-                    onChange={(e) => setSourceType(e.target.value as 'text')}
-                    className={styles.radio}
-                  />
-                  <span>텍스트</span>
-                </label>
-                <label className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    value="youtube_url"
-                    checked={sourceType === 'youtube_url'}
-                    onChange={(e) => setSourceType(e.target.value as 'youtube_url')}
-                    className={styles.radio}
-                  />
-                  <span>YouTube URL</span>
-                </label>
-              </div>
             </div>
 
             {error && (

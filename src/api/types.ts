@@ -143,6 +143,15 @@ export interface CoreContent {
   updated_at: string
 }
 
+// 핵심 정보 조회 응답 타입 (2026-01-20 추가)
+// GET /api/v1/core-content/{sub_topic_id} 응답
+export interface SubTopicCoreContentResponse {
+  id: number
+  name: string
+  core_content: string | null
+  updated_at: string
+}
+
 export interface CreateCoreContentRequest {
   sub_topic_id: number
   content: string
