@@ -4,6 +4,8 @@ import type {
   CoreContent,
   CreateCoreContentRequest,
   UpdateCoreContentRequest,
+  UpdateCoreContentByPathRequest,
+  UpdateCoreContentByPathResponse,
 } from './types'
 
 export const useCoreContent = (subTopicId: number | null) => {
@@ -72,6 +74,33 @@ export const useDeleteCoreContent = () => {
       // 삭제된 핵심 정보 캐시 제거
       queryClient.removeQueries({ queryKey: ['core-content', variables.subTopicId] })
       // 관련 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['sub-topics'] })
+    },
+  })
+}
+
+// 관리자 API - 핵심 정보 등록/수정 (경로 기반, 2026-01-20 추가)
+export const useUpdateCoreContentByPath = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({
+      mainTopicId,
+      subTopicId,
+      data,
+    }: {
+      mainTopicId: number
+      subTopicId: number
+      data: UpdateCoreContentByPathRequest
+    }): Promise<UpdateCoreContentByPathResponse> => {
+      return await apiClient.put<UpdateCoreContentByPathResponse>(
+        `/api/v1/main-topics/${mainTopicId}/sub-topics/${subTopicId}/core-content`,
+        data
+      )
+    },
+    onSuccess: (_data, variables) => {
+      // 관련 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['core-content', variables.subTopicId] })
       queryClient.invalidateQueries({ queryKey: ['sub-topics'] })
     },
   })

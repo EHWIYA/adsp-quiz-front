@@ -185,6 +185,7 @@ export const textarea = style({
 export const select = style({
   width: '100%',
   padding: `${spacing[3]} ${spacing[4]}`,
+  paddingRight: spacing[12], // 화살표 공간 확보
   fontSize: typography.fontSize.base,
   fontFamily: typography.fontFamily.sans,
   color: colors.textPrimary,
@@ -193,20 +194,48 @@ export const select = style({
   borderRadius: borderRadius.md,
   cursor: 'pointer',
   transition: 'all 0.2s ease-in-out',
+  appearance: 'none', // 기본 화살표 제거
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: `right ${spacing[4]} center`,
+  backgroundSize: '16px 16px',
+  ':hover': {
+    borderColor: colors.primary,
+    backgroundColor: colors.gray50,
+  },
   ':focus': {
     outline: 'none',
     borderColor: colors.primary,
     boxShadow: `0 0 0 3px ${colors.primary}20`,
+    backgroundColor: colors.white,
+  },
+  ':disabled': {
+    backgroundColor: colors.gray100,
+    borderColor: colors.gray300,
+    cursor: 'not-allowed',
+    opacity: 0.6,
+    color: colors.textSecondary,
   },
   selectors: {
     '.dark &': {
       color: darkColors.textPrimary,
       backgroundColor: darkColors.backgroundSecondary,
       borderColor: darkColors.gray600,
+      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4L6 8L10 4' stroke='%9CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`,
+    },
+    '.dark &:hover': {
+      borderColor: darkColors.primary,
+      backgroundColor: darkColors.gray700,
     },
     '.dark &:focus': {
       borderColor: darkColors.primary,
       boxShadow: `0 0 0 3px ${darkColors.primary}20`,
+      backgroundColor: darkColors.backgroundSecondary,
+    },
+    '.dark &:disabled': {
+      backgroundColor: darkColors.gray700,
+      borderColor: darkColors.gray600,
+      color: darkColors.textSecondary,
     },
   },
 })
@@ -349,6 +378,18 @@ export const errorText = style({
   selectors: {
     '.dark &': {
       color: darkColors.error,
+    },
+  },
+})
+
+export const successText = style({
+  fontSize: typography.fontSize.xs,
+  color: colors.success || '#10b981',
+  margin: 0,
+  transition: 'color 0.3s ease',
+  selectors: {
+    '.dark &': {
+      color: darkColors.success || '#10b981',
     },
   },
 })

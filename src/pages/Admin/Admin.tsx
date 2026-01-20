@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import * as styles from './Admin.css'
-import { useSubjects, useMainTopics, useSubTopics } from '../../api/subjects'
 import {
   useCoreContent,
   useCreateCoreContent,
   useUpdateCoreContent,
   useDeleteCoreContent,
+  useUpdateCoreContentByPath,
 } from '../../api/coreContent'
+import { SUBJECT_CATEGORIES, getMainTopics, getSubTopics } from '../../data/subjectCategories'
+import { Dropdown } from '../../components/Dropdown/Dropdown'
 import type { ApiError } from '../../api/types'
 
 export const Admin = () => {
@@ -20,13 +22,22 @@ export const Admin = () => {
   const [sourceType, setSourceType] = useState<'text' | 'youtube_url'>('text')
   const [isEditMode, setIsEditMode] = useState(false)
 
-  const { data: subjects, isLoading: isLoadingSubjects, isError: isSubjectsError } = useSubjects()
-  const { data: mainTopicsData, isLoading: isLoadingMainTopics } = useMainTopics(selectedSubjectId)
-  const { data: subTopicsData, isLoading: isLoadingSubTopics } = useSubTopics(selectedMainTopicId)
+  // 하드코딩된 분류 데이터 사용 (2026-01-20 변경)
+  const subjects = useMemo(() => SUBJECT_CATEGORIES.map((s) => ({ id: s.id, name: s.name })), [])
+  const mainTopicsData = useMemo(
+    () => (selectedSubjectId ? getMainTopics(selectedSubjectId) : null),
+    [selectedSubjectId]
+  )
+  const subTopicsData = useMemo(
+    () => (selectedSubjectId && selectedMainTopicId ? getSubTopics(selectedSubjectId, selectedMainTopicId) : null),
+    [selectedSubjectId, selectedMainTopicId]
+  )
+  
   const { data: coreContent, isLoading: isLoadingCoreContent, isError: isCoreContentError } = useCoreContent(selectedSubTopicId)
   
   const createMutation = useCreateCoreContent()
   const updateMutation = useUpdateCoreContent()
+  const updateByPathMutation = useUpdateCoreContentByPath()
   const deleteMutation = useDeleteCoreContent()
 
   // 과목 선택 시 주요항목 초기화
@@ -63,42 +74,28 @@ export const Admin = () => {
   }, [coreContent, selectedSubTopicId, isLoadingCoreContent, isCoreContentError])
 
   const handleSave = () => {
-    if (!selectedSubTopicId || !content.trim()) {
+    if (!selectedSubTopicId || !selectedMainTopicId || !content.trim()) {
       return
     }
 
-    if (isEditMode && coreContent) {
-      // 수정
-      updateMutation.mutate(
-        {
-          id: coreContent.id,
-          data: {
-            content: content.trim(),
-            source_type: sourceType,
-          },
+    // 새로운 경로 기반 API 사용 (2026-01-20 변경)
+    updateByPathMutation.mutate(
+      {
+        mainTopicId: selectedMainTopicId,
+        subTopicId: selectedSubTopicId,
+        data: {
+          core_content: content.trim(),
         },
-        {
-          onSuccess: () => {
-            alert('핵심 정보가 수정되었습니다.')
-          },
-        }
-      )
-    } else {
-      // 등록
-      createMutation.mutate(
-        {
-          sub_topic_id: selectedSubTopicId,
-          content: content.trim(),
-          source_type: sourceType,
-        },
-        {
-          onSuccess: () => {
-            alert('핵심 정보가 등록되었습니다.')
+      },
+      {
+        onSuccess: () => {
+          alert(isEditMode ? '핵심 정보가 수정되었습니다.' : '핵심 정보가 등록되었습니다.')
+          if (!isEditMode) {
             setIsEditMode(true)
-          },
-        }
-      )
-    }
+          }
+        },
+      }
+    )
   }
 
   const handleDelete = () => {
@@ -123,8 +120,9 @@ export const Admin = () => {
     }
   }
 
-  const error = createMutation.error || updateMutation.error || deleteMutation.error
-  const isPending = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+
+  const error = createMutation.error || updateMutation.error || updateByPathMutation.error || deleteMutation.error
+  const isPending = createMutation.isPending || updateMutation.isPending || updateByPathMutation.isPending || deleteMutation.isPending
 
   return (
     <div className={styles.container}>
@@ -138,26 +136,16 @@ export const Admin = () => {
           <label className={styles.label} htmlFor="subjectId">
             과목 선택
           </label>
-          <select
+          <Dropdown
             id="subjectId"
-            className={styles.select}
-            value={selectedSubjectId || ''}
-            onChange={(e) => setSelectedSubjectId(e.target.value ? Number(e.target.value) : null)}
-            disabled={isLoadingSubjects || isSubjectsError}
-          >
-            <option value="">과목을 선택하세요</option>
-            {subjects?.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-          {isLoadingSubjects && (
-            <p className={styles.helperText}>과목 목록을 불러오는 중...</p>
-          )}
-          {isSubjectsError && (
-            <p className={styles.errorText}>과목 목록을 불러올 수 없습니다.</p>
-          )}
+            value={selectedSubjectId}
+            options={subjects.map((subject) => ({
+              value: subject.id,
+              label: subject.name,
+            }))}
+            placeholder="과목을 선택하세요"
+            onChange={(value) => setSelectedSubjectId(value ? Number(value) : null)}
+          />
         </div>
 
         {/* 주요항목 선택 */}
@@ -166,26 +154,19 @@ export const Admin = () => {
             <label className={styles.label} htmlFor="mainTopicId">
               주요항목 선택
             </label>
-            <select
+            <Dropdown
               id="mainTopicId"
-              className={styles.select}
-              value={selectedMainTopicId || ''}
-              onChange={(e) => setSelectedMainTopicId(e.target.value ? Number(e.target.value) : null)}
-              disabled={isLoadingMainTopics || !mainTopicsData}
-            >
-              <option value="">주요항목을 선택하세요</option>
-              {mainTopicsData?.main_topics.map((mainTopic) => (
-                <option key={mainTopic.id} value={mainTopic.id}>
-                  {mainTopic.name}
-                </option>
-              ))}
-            </select>
-            {isLoadingMainTopics && (
-              <p className={styles.helperText}>주요항목 목록을 불러오는 중...</p>
-            )}
-            {mainTopicsData && mainTopicsData.main_topics.length === 0 && (
-              <p className={styles.helperText}>주요항목이 없습니다. 백엔드에 데이터를 입력해주세요.</p>
-            )}
+              value={selectedMainTopicId}
+              options={
+                mainTopicsData?.main_topics.map((mainTopic) => ({
+                  value: mainTopic.id,
+                  label: mainTopic.name,
+                })) || []
+              }
+              placeholder="주요항목을 선택하세요"
+              disabled={!mainTopicsData}
+              onChange={(value) => setSelectedMainTopicId(value ? Number(value) : null)}
+            />
           </div>
         )}
 
@@ -195,26 +176,19 @@ export const Admin = () => {
             <label className={styles.label} htmlFor="subTopicId">
               세부항목 선택
             </label>
-            <select
+            <Dropdown
               id="subTopicId"
-              className={styles.select}
-              value={selectedSubTopicId || ''}
-              onChange={(e) => setSelectedSubTopicId(e.target.value ? Number(e.target.value) : null)}
-              disabled={isLoadingSubTopics || !subTopicsData}
-            >
-              <option value="">세부항목을 선택하세요</option>
-              {subTopicsData?.sub_topics.map((subTopic) => (
-                <option key={subTopic.id} value={subTopic.id}>
-                  {subTopic.name}
-                </option>
-              ))}
-            </select>
-            {isLoadingSubTopics && (
-              <p className={styles.helperText}>세부항목 목록을 불러오는 중...</p>
-            )}
-            {subTopicsData && subTopicsData.sub_topics.length === 0 && (
-              <p className={styles.helperText}>세부항목이 없습니다. 백엔드에 데이터를 입력해주세요.</p>
-            )}
+              value={selectedSubTopicId}
+              options={
+                subTopicsData?.sub_topics.map((subTopic) => ({
+                  value: subTopic.id,
+                  label: subTopic.name,
+                })) || []
+              }
+              placeholder="세부항목을 선택하세요"
+              disabled={!subTopicsData}
+              onChange={(value) => setSelectedSubTopicId(value ? Number(value) : null)}
+            />
           </div>
         )}
 

@@ -5,6 +5,8 @@ import type {
   GenerateQuizResponse,
   GenerateStudyQuizRequest,
   GenerateStudyQuizResponse,
+  GetNextStudyQuizParams,
+  GetNextStudyQuizResponse,
   Quiz,
   QuizResponse,
 } from './types'
@@ -91,6 +93,35 @@ export const useGenerateStudyQuiz = () => {
       quizzes.forEach((quiz) => {
         queryClient.setQueryData(['quiz', quiz.id], quiz)
       })
+    },
+  })
+}
+
+// 학습 모드 점진적 생성 Hook (2026-01-20 추가)
+export const useGetNextStudyQuiz = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (params: GetNextStudyQuizParams): Promise<Quiz> => {
+      // exclude_quiz_ids를 콤마로 구분된 문자열로 변환
+      const queryParams = new URLSearchParams({
+        sub_topic_id: String(params.sub_topic_id),
+      })
+      
+      if (params.exclude_quiz_ids && params.exclude_quiz_ids.length > 0) {
+        queryParams.append('exclude_quiz_ids', params.exclude_quiz_ids.join(','))
+      }
+      
+      const response = await apiClient.get<GetNextStudyQuizResponse>(
+        `/api/v1/quiz/study/next?${queryParams.toString()}`
+      )
+      
+      // 백엔드 응답(QuizResponse)을 프론트엔드 형식(Quiz)으로 변환
+      return transformQuizResponse(response)
+    },
+    onSuccess: (quiz) => {
+      // 생성된 문제를 캐시에 저장
+      queryClient.setQueryData(['quiz', quiz.id], quiz)
     },
   })
 }

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import * as styles from './Training.css'
 import { QuestionDisplay } from '../../components/QuestionDisplay/QuestionDisplay'
-import { useGenerateStudyQuiz } from '../../api/quiz'
-import { useSubjects, useMainTopics, useSubTopics } from '../../api/subjects'
+import { useGetNextStudyQuiz } from '../../api/quiz'
+import { useCoreContent } from '../../api/coreContent'
+import { SUBJECT_CATEGORIES, getMainTopics, getSubTopics } from '../../data/subjectCategories'
+import { Dropdown } from '../../components/Dropdown/Dropdown'
 import type { Quiz } from '../../components/QuizCard/QuizCard.types'
 import type { ApiError } from '../../api/types'
 
@@ -11,16 +13,27 @@ export const Training = () => {
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [showAnswer, setShowAnswer] = useState(false)
+  const [seenQuizIds, setSeenQuizIds] = useState<number[]>([]) // 이미 본 문제 ID 추적
   
   // 3단계 분류 선택 상태
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
   const [selectedMainTopicId, setSelectedMainTopicId] = useState<number | null>(null)
   const [selectedSubTopicId, setSelectedSubTopicId] = useState<number | null>(null)
   
-  const generateStudyQuizMutation = useGenerateStudyQuiz()
-  const { data: subjects, isLoading: isLoadingSubjects, isError: isSubjectsError } = useSubjects()
-  const { data: mainTopicsData, isLoading: isLoadingMainTopics } = useMainTopics(selectedSubjectId)
-  const { data: subTopicsData, isLoading: isLoadingSubTopics } = useSubTopics(selectedMainTopicId)
+  const getNextStudyQuizMutation = useGetNextStudyQuiz()
+  
+  // 하드코딩된 분류 데이터 사용 (2026-01-20 변경)
+  const subjects = useMemo(() => SUBJECT_CATEGORIES.map((s) => ({ id: s.id, name: s.name })), [])
+  const mainTopicsData = useMemo(
+    () => (selectedSubjectId ? getMainTopics(selectedSubjectId) : null),
+    [selectedSubjectId]
+  )
+  const subTopicsData = useMemo(
+    () => (selectedSubjectId && selectedMainTopicId ? getSubTopics(selectedSubjectId, selectedMainTopicId) : null),
+    [selectedSubjectId, selectedMainTopicId]
+  )
+  
+  const { data: coreContent, isLoading: isLoadingCoreContent, isError: isCoreContentError } = useCoreContent(selectedSubTopicId)
 
   // 과목 선택 시 주요항목 초기화
   useEffect(() => {
@@ -42,17 +55,23 @@ export const Training = () => {
       return
     }
 
-    generateStudyQuizMutation.mutate(
+    // 초기화
+    setQuizzes([])
+    setCurrentQuizIndex(0)
+    setSelectedAnswer(undefined)
+    setShowAnswer(false)
+    setSeenQuizIds([])
+
+    // 첫 번째 문제 요청
+    getNextStudyQuizMutation.mutate(
       {
         sub_topic_id: selectedSubTopicId,
-        quiz_count: 10,
       },
       {
-        onSuccess: (generatedQuizzes) => {
-          setQuizzes(generatedQuizzes)
+        onSuccess: (quiz) => {
+          setQuizzes([quiz])
           setCurrentQuizIndex(0)
-          setSelectedAnswer(undefined)
-          setShowAnswer(false)
+          setSeenQuizIds([Number(quiz.id)])
         },
       }
     )
@@ -64,31 +83,56 @@ export const Training = () => {
   }
 
   const handleNext = () => {
+    if (!selectedSubTopicId) {
+      return
+    }
+
+    // 현재 문제 인덱스가 마지막이 아니면 다음 문제로 이동
     if (currentQuizIndex < quizzes.length - 1) {
       setCurrentQuizIndex(currentQuizIndex + 1)
       setSelectedAnswer(undefined)
       setShowAnswer(false)
+      return
+    }
+
+    // 마지막 문제였고, 아직 10문제 미만이면 다음 문제 요청
+    if (quizzes.length < 10) {
+      getNextStudyQuizMutation.mutate(
+        {
+          sub_topic_id: selectedSubTopicId,
+          exclude_quiz_ids: seenQuizIds,
+        },
+        {
+          onSuccess: (quiz) => {
+            setQuizzes([...quizzes, quiz])
+            setCurrentQuizIndex(quizzes.length)
+            setSeenQuizIds([...seenQuizIds, Number(quiz.id)])
+            setSelectedAnswer(undefined)
+            setShowAnswer(false)
+          },
+        }
+      )
     }
   }
 
   // 503 에러 자동 재시도 (7초 후)
   useEffect(() => {
-    const error = generateStudyQuizMutation.error as ApiError | undefined
-    if (error?.status === 503 && !generateStudyQuizMutation.isPending && selectedSubTopicId) {
+    const error = getNextStudyQuizMutation.error as ApiError | undefined
+    if (error?.status === 503 && !getNextStudyQuizMutation.isPending && selectedSubTopicId) {
       const retryTimer = setTimeout(() => {
-        generateStudyQuizMutation.mutate({
+        getNextStudyQuizMutation.mutate({
           sub_topic_id: selectedSubTopicId,
-          quiz_count: 10,
+          exclude_quiz_ids: seenQuizIds,
         })
       }, 7000) // 7초 후 자동 재시도
 
       return () => clearTimeout(retryTimer)
     }
-  }, [generateStudyQuizMutation.error, generateStudyQuizMutation.isPending, selectedSubTopicId])
+  }, [getNextStudyQuizMutation.error, getNextStudyQuizMutation.isPending, selectedSubTopicId, seenQuizIds])
 
   // 문제가 없으면 시작 화면 표시
   if (quizzes.length === 0) {
-    const error = generateStudyQuizMutation.error as ApiError | undefined
+    const error = getNextStudyQuizMutation.error as ApiError | undefined
     const is503Error = error?.status === 503
 
     return (
@@ -103,26 +147,16 @@ export const Training = () => {
               <label className={styles.label} htmlFor="subjectId">
                 과목 선택
               </label>
-              <select
+              <Dropdown
                 id="subjectId"
-                className={styles.select}
-                value={selectedSubjectId || ''}
-                onChange={(e) => setSelectedSubjectId(e.target.value ? Number(e.target.value) : null)}
-                disabled={isLoadingSubjects || isSubjectsError}
-              >
-                <option value="">과목을 선택하세요</option>
-                {subjects?.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </option>
-                ))}
-              </select>
-              {isLoadingSubjects && (
-                <p className={styles.helperText}>과목 목록을 불러오는 중...</p>
-              )}
-              {isSubjectsError && (
-                <p className={styles.errorText}>과목 목록을 불러올 수 없습니다.</p>
-              )}
+                value={selectedSubjectId}
+                options={subjects.map((subject) => ({
+                  value: subject.id,
+                  label: subject.name,
+                }))}
+                placeholder="과목을 선택하세요"
+                onChange={(value) => setSelectedSubjectId(value ? Number(value) : null)}
+              />
             </div>
 
             {/* 주요항목 선택 */}
@@ -131,23 +165,19 @@ export const Training = () => {
                 <label className={styles.label} htmlFor="mainTopicId">
                   주요항목 선택
                 </label>
-                <select
+                <Dropdown
                   id="mainTopicId"
-                  className={styles.select}
-                  value={selectedMainTopicId || ''}
-                  onChange={(e) => setSelectedMainTopicId(e.target.value ? Number(e.target.value) : null)}
-                  disabled={isLoadingMainTopics || !mainTopicsData}
-                >
-                  <option value="">주요항목을 선택하세요</option>
-                  {mainTopicsData?.main_topics.map((mainTopic) => (
-                    <option key={mainTopic.id} value={mainTopic.id}>
-                      {mainTopic.name}
-                    </option>
-                  ))}
-                </select>
-                {isLoadingMainTopics && (
-                  <p className={styles.helperText}>주요항목 목록을 불러오는 중...</p>
-                )}
+                  value={selectedMainTopicId}
+                  options={
+                    mainTopicsData?.main_topics.map((mainTopic) => ({
+                      value: mainTopic.id,
+                      label: mainTopic.name,
+                    })) || []
+                  }
+                  placeholder="주요항목을 선택하세요"
+                  disabled={!mainTopicsData}
+                  onChange={(value) => setSelectedMainTopicId(value ? Number(value) : null)}
+                />
               </div>
             )}
 
@@ -157,22 +187,37 @@ export const Training = () => {
                 <label className={styles.label} htmlFor="subTopicId">
                   세부항목 선택
                 </label>
-                <select
+                <Dropdown
                   id="subTopicId"
-                  className={styles.select}
-                  value={selectedSubTopicId || ''}
-                  onChange={(e) => setSelectedSubTopicId(e.target.value ? Number(e.target.value) : null)}
-                  disabled={isLoadingSubTopics || !subTopicsData}
-                >
-                  <option value="">세부항목을 선택하세요</option>
-                  {subTopicsData?.sub_topics.map((subTopic) => (
-                    <option key={subTopic.id} value={subTopic.id}>
-                      {subTopic.name}
-                    </option>
-                  ))}
-                </select>
-                {isLoadingSubTopics && (
-                  <p className={styles.helperText}>세부항목 목록을 불러오는 중...</p>
+                  value={selectedSubTopicId}
+                  options={
+                    subTopicsData?.sub_topics.map((subTopic) => ({
+                      value: subTopic.id,
+                      label: subTopic.name,
+                    })) || []
+                  }
+                  placeholder="세부항목을 선택하세요"
+                  disabled={!subTopicsData}
+                  onChange={(value) => setSelectedSubTopicId(value ? Number(value) : null)}
+                />
+                {/* 핵심 정보 존재 여부 확인 */}
+                {selectedSubTopicId && !isLoadingCoreContent && (
+                  <>
+                    {isCoreContentError ? (
+                      <div className={styles.error}>
+                        <p className={styles.errorMessage}>
+                          이 세부항목에 핵심 정보가 등록되어 있지 않습니다.
+                        </p>
+                        <p className={styles.helperText} style={{ marginTop: '8px', fontSize: '0.9em' }}>
+                          관리 페이지에서 먼저 핵심 정보를 등록해주세요.
+                        </p>
+                      </div>
+                    ) : coreContent ? (
+                      <p className={styles.successText}>
+                        ✓ 핵심 정보가 등록되어 있습니다.
+                      </p>
+                    ) : null}
+                  </>
                 )}
               </div>
             )}
@@ -192,11 +237,11 @@ export const Training = () => {
                 <button
                   className={styles.retryButton}
                   onClick={() => {
-                    generateStudyQuizMutation.reset()
+                    getNextStudyQuizMutation.reset()
                     if (selectedSubTopicId) {
-                      generateStudyQuizMutation.mutate({
+                      getNextStudyQuizMutation.mutate({
                         sub_topic_id: selectedSubTopicId,
-                        quiz_count: 10,
+                        exclude_quiz_ids: seenQuizIds,
                       })
                     }
                   }}
@@ -209,9 +254,21 @@ export const Training = () => {
             <button
               className={styles.startButton}
               onClick={handleStart}
-              disabled={generateStudyQuizMutation.isPending || !selectedSubTopicId}
+              disabled={
+                getNextStudyQuizMutation.isPending ||
+                !selectedSubTopicId ||
+                isLoadingCoreContent ||
+                isCoreContentError ||
+                !coreContent
+              }
             >
-              {generateStudyQuizMutation.isPending ? '문제 생성 중...' : '학습 시작하기'}
+              {getNextStudyQuizMutation.isPending
+                ? '문제 생성 중...'
+                : isLoadingCoreContent
+                  ? '핵심 정보 확인 중...'
+                  : isCoreContentError || !coreContent
+                    ? '핵심 정보가 없습니다'
+                    : '학습 시작하기'}
             </button>
           </div>
         </div>
@@ -243,21 +300,22 @@ export const Training = () => {
 
       {showAnswer && (
         <div className={styles.footer}>
-          {generateStudyQuizMutation.isError && (
+          {getNextStudyQuizMutation.isError && (
             <div className={styles.error}>
               <p className={styles.errorMessage}>
-                {(generateStudyQuizMutation.error as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
+                {(getNextStudyQuizMutation.error as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
               </p>
             </div>
           )}
-          {currentQuizIndex < totalQuestions - 1 ? (
+          {currentQuizIndex < totalQuestions - 1 || (totalQuestions < 10 && !getNextStudyQuizMutation.isPending) ? (
             <button
               className={styles.nextButton}
               onClick={handleNext}
+              disabled={getNextStudyQuizMutation.isPending}
             >
-              다음 문제
+              {getNextStudyQuizMutation.isPending ? '문제 생성 중...' : '다음 문제'}
             </button>
-          ) : (
+          ) : totalQuestions >= 10 ? (
             <button
               className={styles.startButton}
               onClick={() => {
@@ -265,6 +323,7 @@ export const Training = () => {
                 setCurrentQuizIndex(0)
                 setSelectedAnswer(undefined)
                 setShowAnswer(false)
+                setSeenQuizIds([])
                 setSelectedSubjectId(null)
                 setSelectedMainTopicId(null)
                 setSelectedSubTopicId(null)
@@ -272,7 +331,7 @@ export const Training = () => {
             >
               다시 시작
             </button>
-          )}
+          ) : null}
         </div>
       )}
     </div>

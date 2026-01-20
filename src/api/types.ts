@@ -103,6 +103,17 @@ export interface SubTopicsResponse {
   total: number
 }
 
+// 주요항목/세부항목 생성 타입 (2026-01-20 추가)
+export interface CreateMainTopicRequest {
+  name: string
+  description?: string | null
+}
+
+export interface CreateSubTopicRequest {
+  name: string
+  description?: string | null
+}
+
 // 학습 모드 문제 생성 타입 (2026-01-19 추가)
 export interface GenerateStudyQuizRequest {
   sub_topic_id: number
@@ -113,6 +124,14 @@ export interface GenerateStudyQuizResponse {
   quizzes: QuizResponse[]
   total_count: number
 }
+
+// 학습 모드 점진적 생성 타입 (2026-01-20 추가)
+export interface GetNextStudyQuizParams {
+  sub_topic_id: number
+  exclude_quiz_ids?: number[] // 이미 본 문제 ID 리스트
+}
+
+export type GetNextStudyQuizResponse = QuizResponse
 
 // 핵심 정보 관리 타입 (2026-01-19 추가)
 export interface CoreContent {
@@ -133,6 +152,18 @@ export interface CreateCoreContentRequest {
 export interface UpdateCoreContentRequest {
   content: string
   source_type?: 'text' | 'youtube_url'
+}
+
+// 관리자 API 핵심 정보 등록/수정 요청 (2026-01-20 변경)
+export interface UpdateCoreContentByPathRequest {
+  core_content: string
+}
+
+export interface UpdateCoreContentByPathResponse {
+  id: number
+  name: string
+  core_content: string
+  updated_at: string
 }
 
 export interface ApiError {
