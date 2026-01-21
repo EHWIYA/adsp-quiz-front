@@ -149,6 +149,7 @@ export interface SubTopicCoreContentResponse {
   id: number
   name: string
   core_content: string | null
+  source_type: 'text' | 'youtube_url' | null // 2026-01-20 백엔드 변경사항 반영
   updated_at: string
 }
 
@@ -166,6 +167,7 @@ export interface UpdateCoreContentRequest {
 // 관리자 API 핵심 정보 등록/수정 요청 (2026-01-20 변경)
 export interface UpdateCoreContentByPathRequest {
   core_content: string
+  source_type: 'text' | 'youtube_url' // 2026-01-20 백엔드 변경사항: 필수 필드로 변경
 }
 
 export interface UpdateCoreContentByPathResponse {

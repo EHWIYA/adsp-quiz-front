@@ -90,7 +90,7 @@ class ApiClient {
       details?: unknown
     }
     
-    // 백엔드가 detail 필드로 에러 메시지를 반환하는 경우 처리
+    // 백엔드가 detail 필드로 에러 메시지를 반환하는 경우 처리 (2026-01-20 백엔드 변경사항 반영)
     let errorMessage = error.message
     if (!errorMessage && error.detail) {
       if (typeof error.detail === 'string') {
@@ -101,11 +101,14 @@ class ApiClient {
       }
     }
     
+    // code 필드 우선 사용 (백엔드 변경사항: 모든 에러 응답에 code 필드 포함)
+    const errorCode = error.code || `HTTP_${status}`
+    
     return {
       message: errorMessage || '알 수 없는 오류가 발생했습니다.',
-      code: error.code || `HTTP_${status}`,
+      code: errorCode,
       status,
-      details: error.details || error.detail,
+      details: error.details || (typeof error.detail === 'string' ? undefined : error.detail),
     }
   }
 
