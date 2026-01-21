@@ -347,7 +347,7 @@ export const Admin = () => {
                     에러 코드: {(error as ApiError).code}
                   </p>
                 )}
-                {(error as ApiError)?.details && (
+                {(error as ApiError)?.details != null && (
                   <p className={styles.helperText} style={{ marginTop: '8px', fontSize: '0.9em' }}>
                     상세: {JSON.stringify((error as ApiError).details)}
                   </p>
