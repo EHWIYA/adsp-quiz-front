@@ -23,6 +23,8 @@ export const QuizCard = ({ quiz, selectedAnswer, onAnswerSelect, showCorrectionR
         <div className={styles.options}>
           {quiz.options.map((option, index) => {
             const isSelected = selectedAnswer === index
+            // ⚠️ 정답 비교: 항상 응답의 correctAnswer 사용 (문제 변형 시 인덱스 변경 가능)
+            // 문제 ID로 정답을 캐싱하거나 저장하지 말 것
             const isCorrect = quiz.correctAnswer === index
             // 선택된 답안이 있으면 즉시 정/오 판별
             const hasSelection = selectedAnswer !== undefined

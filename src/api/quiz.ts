@@ -36,6 +36,8 @@ function transformGenerateQuizRequest(data: GenerateQuizRequest): Record<string,
 }
 
 // 백엔드 응답(QuizResponse)을 프론트엔드 형식(Quiz)으로 변환
+// ⚠️ 주의: 학습 모드에서 문제가 변형되면 동일한 문제 ID라도 correct_answer 인덱스가 변경될 수 있음
+// 항상 응답의 correct_answer 값을 사용해야 하며, 문제 ID로 정답을 캐싱하지 말 것
 function transformQuizResponse(response: QuizResponse): Quiz {
   return {
     id: String(response.id),
