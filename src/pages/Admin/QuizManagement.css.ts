@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { colors, darkColors, typography, spacing, borderRadius, breakpoints } from '../../styles/theme'
+import { colors, darkColors, typography, spacing, borderRadius } from '../../styles/theme'
 
 export const container = style({
   width: '100%',
