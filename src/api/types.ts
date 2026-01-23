@@ -144,13 +144,18 @@ export interface CoreContent {
   updated_at: string
 }
 
-// 핵심 정보 조회 응답 타입 (2026-01-20 추가)
+// 핵심 정보 조회 응답 타입 (2026-01-24 변경: 단일 → 배열)
 // GET /api/v1/core-content/{sub_topic_id} 응답
+export interface CoreContentItem {
+  index: number
+  core_content: string
+  source_type: 'text' | 'youtube_url'
+}
+
 export interface SubTopicCoreContentResponse {
   id: number
   name: string
-  core_content: string | null
-  source_type: 'text' | 'youtube_url' | null // 2026-01-20 백엔드 변경사항 반영
+  core_contents: CoreContentItem[] // 2026-01-24 변경: core_content → core_contents 배열
   updated_at: string
 }
 

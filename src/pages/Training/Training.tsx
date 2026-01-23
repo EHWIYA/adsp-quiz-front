@@ -212,9 +212,9 @@ export const Training = () => {
                           관리 페이지에서 먼저 핵심 정보를 등록해주세요.
                         </p>
                       </div>
-                    ) : coreContent ? (
+                    ) : coreContent && coreContent.core_contents.length > 0 ? (
                       <p className={styles.successText}>
-                        ✓ 핵심 정보가 등록되어 있습니다.
+                        ✓ 핵심 정보가 {coreContent.core_contents.length}개 등록되어 있습니다.
                       </p>
                     ) : null}
                   </>
@@ -259,14 +259,15 @@ export const Training = () => {
                 !selectedSubTopicId ||
                 isLoadingCoreContent ||
                 isCoreContentError ||
-                !coreContent
+                !coreContent ||
+                coreContent.core_contents.length === 0
               }
             >
               {getNextStudyQuizMutation.isPending
                 ? '문제 생성 중...'
                 : isLoadingCoreContent
                   ? '핵심 정보 확인 중...'
-                  : isCoreContentError || !coreContent
+                  : isCoreContentError || !coreContent || coreContent.core_contents.length === 0
                     ? '핵심 정보가 없습니다'
                     : '학습 시작하기'}
             </button>

@@ -84,6 +84,11 @@ export const menuIcon = style({
   backgroundColor: colors.textPrimary,
   borderRadius: '2px',
   transition: 'all 0.3s ease',
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.textPrimary || '#ffffff',
+    },
+  },
 })
 
 export const navRight = style({

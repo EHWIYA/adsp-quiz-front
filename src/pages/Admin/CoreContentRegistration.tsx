@@ -68,34 +68,14 @@ export const CoreContentRegistration = () => {
     }
   }, [selectedMainTopicId])
 
-  // 세부항목 선택 시 핵심 정보 로드
+  // 세부항목 선택 시 핵심 정보 로드 (기존 정보 표시용, 입력 필드는 비우기)
   useEffect(() => {
-    if (coreContent && selectedSubTopicId) {
-      // core_content가 null이어도 200 OK로 응답되므로, null인 경우 빈 문자열로 처리
-      const contentValue = coreContent.core_content || ''
-      setContent(contentValue)
-      
-      // 백엔드에서 제공하는 source_type 우선 사용, 없으면 자동 감지
-      if (coreContent.source_type) {
-        setSourceType(coreContent.source_type)
-      } else if (contentValue.trim()) {
-        setSourceType(detectSourceType(contentValue))
-      } else {
-        // core_content가 null이거나 빈 문자열인 경우 기본값 설정
-        setSourceType('text')
-      }
-      
-      // 이미 등록된 데이터가 있으면 입력 필드 비활성화 (수정/삭제 불가)
-    } else if (selectedSubTopicId && !isLoadingCoreContent && isCoreContentError) {
-      const apiError = coreContentError as ApiError
-      // 404 에러: 핵심 정보가 없는 경우
-      if (apiError?.status === 404) {
-        setContent('')
-        setSourceType('text')
-      }
-      // 500 에러는 별도로 표시 (아래 에러 표시 영역에서 처리)
+    // 세부항목이 변경되면 입력 필드 초기화 (추가 등록을 위해)
+    if (selectedSubTopicId) {
+      setContent('')
+      setSourceType('text')
     }
-  }, [coreContent, selectedSubTopicId, isLoadingCoreContent, isCoreContentError, coreContentError])
+  }, [selectedSubTopicId])
 
   // content 변경 시 source_type 자동 감지
   useEffect(() => {
@@ -135,27 +115,21 @@ export const CoreContentRegistration = () => {
       {
         onSuccess: () => {
           alert('핵심 정보가 등록되었습니다.')
-          // 저장 성공 후 홈으로 이동
+          // 등록 성공 후 홈으로 이동
           navigate('/')
         },
         onError: (error) => {
           const apiError = error as ApiError
           
-          // code 필드 기반 에러 처리 (백엔드 변경사항 반영)
-          if (apiError.code === 'ALREADY_EXISTS') {
-            alert('이미 등록된 핵심 정보입니다. 수정 및 삭제가 불가능합니다.')
-            return
-          }
-          
+          // ALREADY_EXISTS는 더 이상 에러로 처리하지 않음 (다중 등록 허용)
+          // INVALID_CATEGORY 에러 처리
           if (apiError.code === 'INVALID_CATEGORY') {
             alert('선택한 과목, 주요항목, 세부항목이 일치하지 않습니다. 다시 선택해주세요.')
             return
           }
           
           // status 기반 에러 처리 (fallback)
-          if (apiError.status === 409) {
-            alert('이미 등록된 핵심 정보입니다. 수정 및 삭제가 불가능합니다.')
-          } else if (apiError.status === 400) {
+          if (apiError.status === 400) {
             alert(apiError.message || apiError.code || '잘못된 요청입니다.')
           } else if (apiError.status === 500) {
             alert('서버 오류가 발생했습니다. 데이터베이스 연결을 확인해주세요.')
@@ -246,7 +220,7 @@ export const CoreContentRegistration = () => {
                   value="text"
                   checked={sourceType === 'text'}
                   onChange={() => setSourceType('text')}
-                  disabled={isLoadingCoreContent || !!coreContent?.core_content}
+                  disabled={isLoadingCoreContent}
                 />
                 <span>텍스트</span>
               </label>
@@ -257,7 +231,7 @@ export const CoreContentRegistration = () => {
                   value="youtube_url"
                   checked={sourceType === 'youtube_url'}
                   onChange={() => setSourceType('youtube_url')}
-                  disabled={isLoadingCoreContent || !!coreContent?.core_content}
+                  disabled={isLoadingCoreContent}
                 />
                 <span>YouTube URL</span>
               </label>
@@ -271,9 +245,9 @@ export const CoreContentRegistration = () => {
 
           <div className={styles.formGroup}>
             <label className={styles.label}>핵심 정보</label>
-            {coreContent?.core_content && (
-              <p className={styles.helperText} style={{ marginBottom: '8px', fontSize: '0.9em', color: '#ff9800' }}>
-                ⚠️ 이미 등록된 핵심 정보입니다. 수정 및 삭제가 불가능합니다.
+            {coreContent && coreContent.core_contents.length > 0 && (
+              <p className={styles.helperText} style={{ marginBottom: '8px', fontSize: '0.9em', color: '#2196F3' }}>
+                ℹ️ 이 세부항목에 이미 등록된 핵심 정보가 {coreContent.core_contents.length}개 있습니다. 추가로 핵심 정보를 등록할 수 있으며, 백엔드에서 모든 핵심 정보를 종합하여 문제 생성 다양화 및 강화에 활용됩니다.
               </p>
             )}
             <textarea
@@ -281,7 +255,7 @@ export const CoreContentRegistration = () => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder={sourceType === 'youtube_url' ? 'YouTube URL을 입력하세요...' : '핵심 정보를 입력하세요...'}
-              disabled={isLoadingCoreContent || !!coreContent?.core_content}
+              disabled={isLoadingCoreContent}
             />
             {isLoadingCoreContent && (
               <p className={styles.helperText}>핵심 정보를 불러오는 중...</p>
@@ -329,9 +303,7 @@ export const CoreContentRegistration = () => {
           {error && (
             <div className={styles.error}>
               <p className={styles.errorMessage}>
-                {(error as ApiError)?.code === 'ALREADY_EXISTS'
-                  ? '이미 등록된 핵심 정보입니다. 수정 및 삭제가 불가능합니다.'
-                  : (error as ApiError)?.code === 'INVALID_CATEGORY'
+                {(error as ApiError)?.code === 'INVALID_CATEGORY'
                   ? '선택한 과목, 주요항목, 세부항목이 일치하지 않습니다.'
                   : (error as ApiError)?.status === 500
                   ? '서버 오류가 발생했습니다. 데이터베이스 연결을 확인해주세요.'
@@ -354,9 +326,9 @@ export const CoreContentRegistration = () => {
             <button
               className={styles.button}
               onClick={handleSave}
-              disabled={isPending || !content.trim() || !!coreContent?.core_content}
+              disabled={isPending || !content.trim()}
             >
-              {isPending ? '처리 중...' : coreContent?.core_content ? '이미 등록됨' : '등록'}
+              {isPending ? '처리 중...' : '등록'}
             </button>
           </div>
         </div>
