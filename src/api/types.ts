@@ -11,6 +11,7 @@ export interface QuizResponse {
   explanation: string
   source_url: string
   created_at: string
+  validation_status?: 'pending' | 'valid' | 'invalid' // 2026-01-23 추가: 검증 상태
 }
 
 // 프론트엔드에서 사용하는 Quiz 타입 (camelCase)
@@ -164,17 +165,50 @@ export interface UpdateCoreContentRequest {
   source_type?: 'text' | 'youtube_url'
 }
 
-// 관리자 API 핵심 정보 등록/수정 요청 (2026-01-20 변경)
-export interface UpdateCoreContentByPathRequest {
+// 관리자 API 핵심 정보 등록 요청 (2026-01-23 변경: PUT → POST, 수정 → 추가)
+export interface CreateCoreContentByPathRequest {
   core_content: string
-  source_type: 'text' | 'youtube_url' // 2026-01-20 백엔드 변경사항: 필수 필드로 변경
+  source_type: 'text' | 'youtube_url'
 }
 
-export interface UpdateCoreContentByPathResponse {
+export interface CreateCoreContentByPathResponse {
   id: number
   name: string
   core_content: string
   updated_at: string
+}
+
+// 문제 검증 타입 (2026-01-23 추가)
+export interface ValidateQuizResponse {
+  quiz_id: number
+  is_valid: boolean
+  category: string
+  validation_score: number
+  feedback: string
+  issues: string[]
+}
+
+// 문제 수정 요청 타입 (2026-01-23 추가)
+export interface RequestCorrectionRequest {
+  correction_request: string
+  suggested_correction?: string
+}
+
+export interface RequestCorrectionResponse {
+  quiz_id: number
+  is_valid_request: boolean
+  validation_feedback: string
+  corrected_quiz?: QuizResponse
+  original_quiz: QuizResponse
+}
+
+// 관리자 대시보드 타입 (2026-01-23 추가)
+export interface QuizDashboardResponse {
+  total_quizzes: number
+  quizzes_by_category: Record<string, number>
+  validation_status: Record<string, number>
+  recent_quizzes: QuizResponse[]
+  quizzes_needing_validation: QuizResponse[]
 }
 
 export interface ApiError {

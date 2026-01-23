@@ -5,8 +5,8 @@ import type {
   SubTopicCoreContentResponse,
   CreateCoreContentRequest,
   UpdateCoreContentRequest,
-  UpdateCoreContentByPathRequest,
-  UpdateCoreContentByPathResponse,
+  CreateCoreContentByPathRequest,
+  CreateCoreContentByPathResponse,
 } from './types'
 
 export const useCoreContent = (subTopicId: number | null) => {
@@ -80,8 +80,8 @@ export const useDeleteCoreContent = () => {
   })
 }
 
-// 관리자 API - 핵심 정보 등록/수정 (경로 기반, 2026-01-20 추가)
-export const useUpdateCoreContentByPath = () => {
+// 관리자 API - 핵심 정보 등록 (경로 기반, 2026-01-23 변경: PUT → POST, 수정 → 추가)
+export const useCreateCoreContentByPath = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
@@ -92,9 +92,9 @@ export const useUpdateCoreContentByPath = () => {
     }: {
       mainTopicId: number
       subTopicId: number
-      data: UpdateCoreContentByPathRequest
-    }): Promise<UpdateCoreContentByPathResponse> => {
-      return await apiClient.put<UpdateCoreContentByPathResponse>(
+      data: CreateCoreContentByPathRequest
+    }): Promise<CreateCoreContentByPathResponse> => {
+      return await apiClient.post<CreateCoreContentByPathResponse>(
         `/api/v1/main-topics/${mainTopicId}/sub-topics/${subTopicId}/core-content`,
         data
       )

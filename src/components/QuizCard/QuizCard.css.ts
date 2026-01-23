@@ -82,12 +82,12 @@ export const option = style({
   },
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray200,
-      borderColor: darkColors.gray300,
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
       color: darkColors.textPrimary,
     },
     '.dark &:hover': {
-      backgroundColor: darkColors.gray300,
+      backgroundColor: darkColors.gray200,
       borderColor: darkColors.primary,
     },
   },
@@ -226,8 +226,8 @@ export const explanation = style({
   transition: 'background-color 0.3s ease, border-color 0.3s ease',
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray200,
-      borderColor: darkColors.gray300,
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
     },
   },
 })
@@ -253,6 +253,47 @@ export const explanationText = style({
   selectors: {
     '.dark &': {
       color: darkColors.textPrimary,
+    },
+  },
+})
+
+export const actions = style({
+  marginTop: spacing[4],
+  paddingTop: spacing[4],
+  borderTop: `1px solid ${colors.gray200}`,
+  display: 'flex',
+  justifyContent: 'flex-end',
+  selectors: {
+    '.dark &': {
+      borderTopColor: darkColors.gray700,
+    },
+  },
+})
+
+export const correctionButton = style({
+  padding: `${spacing[2]} ${spacing[4]}`,
+  fontSize: typography.fontSize.sm,
+  fontWeight: typography.fontWeight.medium,
+  color: colors.textSecondary,
+  backgroundColor: 'transparent',
+  border: `1px solid ${colors.gray300}`,
+  borderRadius: borderRadius.md,
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
+  ':hover': {
+    color: colors.primary,
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+      borderColor: darkColors.gray600,
+    },
+    '.dark &:hover': {
+      color: darkColors.primary,
+      borderColor: darkColors.primary,
+      backgroundColor: darkColors.primary + '20',
     },
   },
 })

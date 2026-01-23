@@ -9,6 +9,10 @@ import type {
   GetNextStudyQuizResponse,
   Quiz,
   QuizResponse,
+  ValidateQuizResponse,
+  RequestCorrectionRequest,
+  RequestCorrectionResponse,
+  QuizDashboardResponse,
 } from './types'
 
 // GenerateQuizRequest를 백엔드 형식으로 변환
@@ -123,5 +127,58 @@ export const useGetNextStudyQuiz = () => {
       // 생성된 문제를 캐시에 저장
       queryClient.setQueryData(['quiz', quiz.id], quiz)
     },
+  })
+}
+
+// 문제 검증 Hook (2026-01-23 추가)
+export const useValidateQuiz = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (quizId: number): Promise<ValidateQuizResponse> => {
+      return await apiClient.post<ValidateQuizResponse>(`/api/v1/quiz/${quizId}/validate`)
+    },
+    onSuccess: () => {
+      // 대시보드 캐시 무효화 (검증 상태가 변경되었으므로)
+      queryClient.invalidateQueries({ queryKey: ['quiz-dashboard'] })
+    },
+  })
+}
+
+// 문제 수정 요청 Hook (2026-01-23 추가)
+export const useRequestCorrection = () => {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({
+      quizId,
+      data,
+    }: {
+      quizId: number
+      data: RequestCorrectionRequest
+    }): Promise<RequestCorrectionResponse> => {
+      return await apiClient.post<RequestCorrectionResponse>(`/api/v1/quiz/${quizId}/correction`, data)
+    },
+    onSuccess: (response) => {
+      // 수정된 문제가 있으면 캐시 업데이트
+      if (response.corrected_quiz) {
+        const transformedQuiz = transformQuizResponse(response.corrected_quiz)
+        queryClient.setQueryData(['quiz', transformedQuiz.id], transformedQuiz)
+      }
+      // 대시보드 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['quiz-dashboard'] })
+    },
+  })
+}
+
+// 관리자 대시보드 Hook (2026-01-23 추가)
+export const useQuizDashboard = () => {
+  return useQuery({
+    queryKey: ['quiz-dashboard'],
+    queryFn: async (): Promise<QuizDashboardResponse> => {
+      return await apiClient.get<QuizDashboardResponse>('/api/v1/quiz/dashboard')
+    },
+    staleTime: 1000 * 60 * 2, // 2분간 캐시 유지
+    gcTime: 1000 * 60 * 5, // 5분간 캐시 보관
   })
 }
