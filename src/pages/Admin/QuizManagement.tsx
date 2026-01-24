@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import * as styles from './QuizManagement.css'
 import { useQuizDashboard, useValidateQuiz } from '../../api/quiz'
+import { useUIStore } from '../../store/uiStore'
 import type { ApiError } from '../../api/types'
 import type { QuizResponse } from '../../api/types'
 
 export const QuizManagement = () => {
   const { data: dashboard, isLoading, isError, error, refetch } = useQuizDashboard()
   const validateQuizMutation = useValidateQuiz()
+  const { setLoading } = useUIStore()
   const [validatingQuizId, setValidatingQuizId] = useState<number | null>(null)
   const [validationResult, setValidationResult] = useState<{
     quizId: number
@@ -18,6 +20,9 @@ export const QuizManagement = () => {
     setValidationResult(null)
     
     validateQuizMutation.mutate(quizId, {
+      onMutate: () => {
+        setLoading(true)
+      },
       onSuccess: (result) => {
         setValidationResult({ quizId, result })
         
@@ -27,6 +32,9 @@ export const QuizManagement = () => {
       },
       onError: () => {
         setValidatingQuizId(null)
+      },
+      onSettled: () => {
+        setLoading(false)
       },
     })
   }
@@ -110,9 +118,7 @@ export const QuizManagement = () => {
                 {validationResult.result.is_valid ? '유효' : '무효'}
               </span>
               <span className={styles.validationScore}>
-                검증 점수: {validationResult.result.validation_score < 1 
-                  ? (validationResult.result.validation_score * 100).toFixed(0)
-                  : validationResult.result.validation_score}/100
+                검증 점수: {Math.round(validationResult.result.validation_score * 100)}/100
               </span>
             </div>
             {validationResult.result.category && (

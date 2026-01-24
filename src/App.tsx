@@ -7,7 +7,9 @@ import { ExamResult } from './pages/ExamResult/ExamResult'
 import { Mypage } from './pages/Mypage/Mypage'
 import { Admin } from './pages/Admin/Admin'
 import { useThemeStore } from './store/themeStore'
+import { useUIStore } from './store/uiStore'
 import { ThemeToggle } from './components/ThemeToggle/ThemeToggle'
+import { Loading } from './components/Loading/Loading'
 import * as styles from './App.css'
 
 const Navigation = () => {
@@ -78,6 +80,7 @@ const Navigation = () => {
 
 function App() {
   const { resolvedTheme } = useThemeStore()
+  const { isLoading } = useUIStore()
 
   // 테마 변경 시 DOM에 적용
   useEffect(() => {
@@ -115,6 +118,7 @@ function App() {
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
+        <Loading isLoading={isLoading} />
       </div>
     </BrowserRouter>
   )

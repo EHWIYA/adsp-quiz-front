@@ -7,6 +7,8 @@ interface UIState {
   closeModal: () => void
   isSidebarOpen: boolean
   toggleSidebar: () => void
+  isLoading: boolean
+  setLoading: (loading: boolean) => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -21,5 +23,9 @@ export const useUIStore = create<UIState>((set) => ({
   isSidebarOpen: false,
   toggleSidebar: () => {
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen }))
+  },
+  isLoading: false,
+  setLoading: (loading: boolean) => {
+    set({ isLoading: loading })
   },
 }))

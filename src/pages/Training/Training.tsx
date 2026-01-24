@@ -5,6 +5,7 @@ import { useGetNextStudyQuiz } from '../../api/quiz'
 import { useCoreContent } from '../../api/coreContent'
 import { SUBJECT_CATEGORIES, getMainTopics, getSubTopics } from '../../data/subjectCategories'
 import { Dropdown } from '../../components/Dropdown/Dropdown'
+import { useUIStore } from '../../store/uiStore'
 import type { Quiz } from '../../components/QuizCard/QuizCard.types'
 import type { ApiError } from '../../api/types'
 
@@ -21,6 +22,7 @@ export const Training = () => {
   const [selectedSubTopicId, setSelectedSubTopicId] = useState<number | null>(null)
   
   const getNextStudyQuizMutation = useGetNextStudyQuiz()
+  const { setLoading } = useUIStore()
   
   // 하드코딩된 분류 데이터 사용 (2026-01-20 변경)
   const subjects = useMemo(() => SUBJECT_CATEGORIES.map((s) => ({ id: s.id, name: s.name })), [])
@@ -68,10 +70,16 @@ export const Training = () => {
         sub_topic_id: selectedSubTopicId,
       },
       {
+        onMutate: () => {
+          setLoading(true)
+        },
         onSuccess: (quiz) => {
           setQuizzes([quiz])
           setCurrentQuizIndex(0)
           setSeenQuizIds([Number(quiz.id)])
+        },
+        onSettled: () => {
+          setLoading(false)
         },
       }
     )
@@ -97,6 +105,8 @@ export const Training = () => {
 
     // 마지막 문제였고, 아직 10문제 미만이면 다음 문제 요청
     if (quizzes.length < 10) {
+      // 로딩을 먼저 시작 (비동기 작업 시작 전 즉시 피드백)
+      setLoading(true)
       getNextStudyQuizMutation.mutate(
         {
           sub_topic_id: selectedSubTopicId,
@@ -110,6 +120,13 @@ export const Training = () => {
             setSelectedAnswer(undefined)
             setShowAnswer(false)
           },
+          onError: () => {
+            // 에러 발생 시에도 로딩 해제
+            setLoading(false)
+          },
+          onSettled: () => {
+            setLoading(false)
+          },
         }
       )
     }
@@ -120,15 +137,25 @@ export const Training = () => {
     const error = getNextStudyQuizMutation.error as ApiError | undefined
     if (error?.status === 503 && !getNextStudyQuizMutation.isPending && selectedSubTopicId) {
       const retryTimer = setTimeout(() => {
-        getNextStudyQuizMutation.mutate({
-          sub_topic_id: selectedSubTopicId,
-          exclude_quiz_ids: seenQuizIds,
-        })
+        getNextStudyQuizMutation.mutate(
+          {
+            sub_topic_id: selectedSubTopicId,
+            exclude_quiz_ids: seenQuizIds,
+          },
+          {
+            onMutate: () => {
+              setLoading(true)
+            },
+            onSettled: () => {
+              setLoading(false)
+            },
+          }
+        )
       }, 7000) // 7초 후 자동 재시도
 
       return () => clearTimeout(retryTimer)
     }
-  }, [getNextStudyQuizMutation.error, getNextStudyQuizMutation.isPending, selectedSubTopicId, seenQuizIds])
+  }, [getNextStudyQuizMutation.error, getNextStudyQuizMutation.isPending, selectedSubTopicId, seenQuizIds, setLoading])
 
   // 문제가 없으면 시작 화면 표시
   if (quizzes.length === 0) {
@@ -239,10 +266,20 @@ export const Training = () => {
                   onClick={() => {
                     getNextStudyQuizMutation.reset()
                     if (selectedSubTopicId) {
-                      getNextStudyQuizMutation.mutate({
-                        sub_topic_id: selectedSubTopicId,
-                        exclude_quiz_ids: seenQuizIds,
-                      })
+                      getNextStudyQuizMutation.mutate(
+                        {
+                          sub_topic_id: selectedSubTopicId,
+                          exclude_quiz_ids: seenQuizIds,
+                        },
+                        {
+                          onMutate: () => {
+                            setLoading(true)
+                          },
+                          onSettled: () => {
+                            setLoading(false)
+                          },
+                        }
+                      )
                     }
                   }}
                 >

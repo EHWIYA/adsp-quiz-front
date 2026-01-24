@@ -7,10 +7,12 @@ import {
 } from '../../api/coreContent'
 import { SUBJECT_CATEGORIES, getMainTopics, getSubTopics, getSubTopicById } from '../../data/subjectCategories'
 import { Dropdown } from '../../components/Dropdown/Dropdown'
+import { useUIStore } from '../../store/uiStore'
 import type { ApiError } from '../../api/types'
 
 export const CoreContentRegistration = () => {
   const navigate = useNavigate()
+  const { setLoading } = useUIStore()
   
   // 3단계 분류 선택 상태
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
@@ -113,6 +115,9 @@ export const CoreContentRegistration = () => {
         },
       },
       {
+        onMutate: () => {
+          setLoading(true)
+        },
         onSuccess: () => {
           alert('핵심 정보가 등록되었습니다.')
           // 등록 성공 후 홈으로 이동
@@ -136,6 +141,9 @@ export const CoreContentRegistration = () => {
           } else {
             alert(apiError.message || apiError.code || '오류가 발생했습니다.')
           }
+        },
+        onSettled: () => {
+          setLoading(false)
         },
       }
     )

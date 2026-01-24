@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '../Modal/Modal'
 import { useRequestCorrection } from '../../api/quiz'
+import { useUIStore } from '../../store/uiStore'
 import * as styles from './CorrectionRequestModal.css'
 import type { ApiError } from '../../api/types'
 
@@ -20,6 +21,7 @@ export const CorrectionRequestModal = ({
   const [correctionRequest, setCorrectionRequest] = useState('')
   const [suggestedCorrection, setSuggestedCorrection] = useState('')
   const requestCorrectionMutation = useRequestCorrection()
+  const { setLoading } = useUIStore()
 
   const handleSubmit = () => {
     if (!correctionRequest.trim()) {
@@ -36,6 +38,9 @@ export const CorrectionRequestModal = ({
         },
       },
       {
+        onMutate: () => {
+          setLoading(true)
+        },
         onSuccess: (response) => {
           if (response.is_valid_request) {
             alert('수정 요청이 성공적으로 제출되었습니다.')
@@ -50,6 +55,9 @@ export const CorrectionRequestModal = ({
         onError: (error) => {
           const apiError = error as ApiError
           alert(apiError.message || '수정 요청 제출 중 오류가 발생했습니다.')
+        },
+        onSettled: () => {
+          setLoading(false)
         },
       }
     )

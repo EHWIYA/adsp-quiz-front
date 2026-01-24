@@ -6,11 +6,13 @@ import { QuestionDisplay } from '../../components/QuestionDisplay/QuestionDispla
 import { useStartExam, useSubmitExam } from '../../api/exam'
 import { useExamStore } from '../../store/examStore'
 import { useTimerStore } from '../../store/timerStore'
+import { useUIStore } from '../../store/uiStore'
 
 export const Exam = () => {
   const navigate = useNavigate()
   const { examSessionId, answers, startExam, addAnswer, resetExam } = useExamStore()
   const { seconds, isRunning, start, pause, resume, tick } = useTimerStore()
+  const { setLoading } = useUIStore()
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
   
@@ -26,14 +28,20 @@ export const Exam = () => {
           quizCount: 10 
         },
         {
+          onMutate: () => {
+            setLoading(true)
+          },
           onSuccess: (data) => {
             startExam(data.examSessionId)
             start(data.timeLimit)
           },
+          onSettled: () => {
+            setLoading(false)
+          },
         }
       )
     }
-  }, [examSessionId, startExamMutation.isPending, startExamMutation.data, startExamMutation.isError, startExam, start])
+  }, [examSessionId, startExamMutation.isPending, startExamMutation.data, startExamMutation.isError, startExam, start, setLoading])
 
   useEffect(() => {
     if (!isRunning || seconds <= 0) return
@@ -99,9 +107,15 @@ export const Exam = () => {
         answers: allAnswers,
       },
       {
+        onMutate: () => {
+          setLoading(true)
+        },
         onSuccess: () => {
           resetExam()
           navigate(`/exam/result/${examSessionId}`)
+        },
+        onSettled: () => {
+          setLoading(false)
         },
       }
     )
