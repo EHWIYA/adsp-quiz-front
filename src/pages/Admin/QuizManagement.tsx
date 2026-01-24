@@ -5,8 +5,7 @@ import { useUIStore } from '../../store/uiStore'
 import { Tab } from '../../components/Tab/Tab'
 import { Dropdown } from '../../components/Dropdown/Dropdown'
 import { SUBJECT_CATEGORIES } from '../../data/subjectCategories'
-import type { ApiError } from '../../api/types'
-import type { QuizResponse } from '../../api/types'
+import type { ApiError, QuizResponse, ValidateQuizResponse } from '../../api/types'
 
 type TabType = 'all' | 'validation-needed' | 'by-category'
 
@@ -17,7 +16,7 @@ export const QuizManagement = () => {
   const [validatingQuizId, setValidatingQuizId] = useState<number | null>(null)
   const [validationResult, setValidationResult] = useState<{
     quizId: number
-    result: any
+    result: ValidateQuizResponse
   } | null>(null)
   const [activeTab, setActiveTab] = useState<TabType>('all')
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null)
@@ -43,6 +42,71 @@ export const QuizManagement = () => {
       },
     })
   }
+
+  // 모든 문제를 하나의 배열로 합치기 (최근 문제 + 검증 필요 문제)
+  // 검증 완료된 문제(validation_status: 'valid')는 목록에서 제외
+  const allQuizzes = useMemo<QuizResponse[]>(() => {
+    if (!dashboard) return []
+    return [
+      ...dashboard.recent_quizzes.filter((q) => q.validation_status !== 'valid'),
+      ...dashboard.quizzes_needing_validation.filter(
+        (q) => !dashboard.recent_quizzes.some((rq) => rq.id === q.id)
+      ),
+    ]
+  }, [dashboard])
+
+  // 카테고리별 검증 필요 개수 계산
+  const validationNeededByCategory = useMemo(() => {
+    if (!dashboard) return {}
+    const counts: Record<number, number> = {}
+    dashboard.quizzes_needing_validation.forEach((quiz) => {
+      const subjectId = quiz.subject_id || 1
+      counts[subjectId] = (counts[subjectId] || 0) + 1
+    })
+    return counts
+  }, [dashboard])
+
+  // 필터링된 문제 목록
+  const filteredQuizzes = useMemo(() => {
+    if (!dashboard) return []
+    let filtered = allQuizzes
+
+    // 검색 필터
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(
+        (quiz) =>
+          quiz.question.toLowerCase().includes(query) ||
+          quiz.options.some((opt) => opt.text.toLowerCase().includes(query)) ||
+          quiz.explanation?.toLowerCase().includes(query)
+      )
+    }
+
+    // 탭별 필터
+    if (activeTab === 'validation-needed') {
+      filtered = filtered.filter((quiz) =>
+        dashboard.quizzes_needing_validation.some((vq) => vq.id === quiz.id)
+      )
+    } else if (activeTab === 'by-category') {
+      if (selectedSubjectId) {
+        filtered = filtered.filter((quiz) => quiz.subject_id === selectedSubjectId)
+      }
+      // selectedSubjectId가 null이면 전체 카테고리이므로 필터링하지 않음
+    }
+
+    return filtered
+  }, [allQuizzes, activeTab, selectedSubjectId, searchQuery, dashboard])
+
+  // 카테고리 옵션
+  const categoryOptions = useMemo(() => {
+    return [
+      { value: 0, label: '전체 카테고리' },
+      ...SUBJECT_CATEGORIES.map((subject) => ({
+        value: subject.id,
+        label: subject.name,
+      })),
+    ]
+  }, [])
 
   if (isLoading) {
     return (
@@ -73,66 +137,6 @@ export const QuizManagement = () => {
       </div>
     )
   }
-
-  // 모든 문제를 하나의 배열로 합치기 (최근 문제 + 검증 필요 문제)
-  // 검증 완료된 문제(validation_status: 'valid')는 목록에서 제외
-  const allQuizzes: QuizResponse[] = [
-    ...dashboard.recent_quizzes.filter((q) => q.validation_status !== 'valid'),
-    ...dashboard.quizzes_needing_validation.filter(
-      (q) => !dashboard.recent_quizzes.some((rq) => rq.id === q.id)
-    ),
-  ]
-
-  // 카테고리별 검증 필요 개수 계산
-  const validationNeededByCategory = useMemo(() => {
-    const counts: Record<number, number> = {}
-    dashboard.quizzes_needing_validation.forEach((quiz) => {
-      const subjectId = quiz.subject_id || 1
-      counts[subjectId] = (counts[subjectId] || 0) + 1
-    })
-    return counts
-  }, [dashboard.quizzes_needing_validation])
-
-  // 필터링된 문제 목록
-  const filteredQuizzes = useMemo(() => {
-    let filtered = allQuizzes
-
-    // 검색 필터
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (quiz) =>
-          quiz.question.toLowerCase().includes(query) ||
-          quiz.options.some((opt) => opt.text.toLowerCase().includes(query)) ||
-          quiz.explanation?.toLowerCase().includes(query)
-      )
-    }
-
-    // 탭별 필터
-    if (activeTab === 'validation-needed') {
-      filtered = filtered.filter((quiz) =>
-        dashboard.quizzes_needing_validation.some((vq) => vq.id === quiz.id)
-      )
-    } else if (activeTab === 'by-category') {
-      if (selectedSubjectId) {
-        filtered = filtered.filter((quiz) => quiz.subject_id === selectedSubjectId)
-      }
-      // selectedSubjectId가 null이면 전체 카테고리이므로 필터링하지 않음
-    }
-
-    return filtered
-  }, [allQuizzes, activeTab, selectedSubjectId, searchQuery, dashboard.quizzes_needing_validation])
-
-  // 카테고리 옵션
-  const categoryOptions = useMemo(() => {
-    return [
-      { value: 0, label: '전체 카테고리' },
-      ...SUBJECT_CATEGORIES.map((subject) => ({
-        value: subject.id,
-        label: subject.name,
-      })),
-    ]
-  }, [])
 
   // 탭 변경 시 카테고리 선택 초기화
   const handleTabChange = (tabId: string) => {

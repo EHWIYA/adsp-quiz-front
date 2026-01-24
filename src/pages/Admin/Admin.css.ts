@@ -356,3 +356,188 @@ export const contentSection = style({
     },
   },
 })
+
+export const autoDecisionContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[3],
+})
+
+export const autoDecisionSummary = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[1],
+  padding: spacing[3],
+  backgroundColor: colors.gray50,
+  border: `1px solid ${colors.gray200}`,
+  borderRadius: borderRadius.md,
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+    },
+  },
+})
+
+export const autoDecisionLine = style({
+  fontSize: typography.fontSize.sm,
+  color: colors.textPrimary,
+  margin: 0,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+    },
+  },
+})
+
+export const autoDecisionWarning = style({
+  fontSize: typography.fontSize.xs,
+  color: colors.warning || '#f59e0b',
+  margin: 0,
+  selectors: {
+    '.dark &': {
+      color: colors.warning || '#fbbf24',
+    },
+  },
+})
+
+export const candidateList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[2],
+})
+
+export const candidateItem = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: spacing[2],
+  padding: spacing[3],
+  border: `1px solid ${colors.gray200}`,
+  borderRadius: borderRadius.md,
+  backgroundColor: colors.white,
+  cursor: 'pointer',
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+    },
+  },
+})
+
+export const candidateContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[1],
+})
+
+export const candidatePath = style({
+  fontSize: typography.fontSize.sm,
+  color: colors.textPrimary,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+    },
+  },
+})
+
+export const candidateMeta = style({
+  fontSize: typography.fontSize.xs,
+  color: colors.textSecondary,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+  },
+})
+
+export const autoDecisionReasonBox = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[2],
+})
+
+export const autoDecisionTextarea = style({
+  width: '100%',
+  padding: spacing[3],
+  fontSize: typography.fontSize.sm,
+  fontFamily: typography.fontFamily.sans,
+  color: colors.textPrimary,
+  backgroundColor: colors.gray50,
+  border: `1px solid ${colors.gray300}`,
+  borderRadius: borderRadius.md,
+  resize: 'vertical',
+  minHeight: '90px',
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray600,
+    },
+  },
+})
+
+export const templateList = style({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: spacing[2],
+})
+
+export const templateButton = style({
+  padding: `${spacing[1]} ${spacing[2]}`,
+  borderRadius: borderRadius.sm,
+  border: `1px solid ${colors.gray200}`,
+  backgroundColor: colors.white,
+  fontSize: typography.fontSize.xs,
+  color: colors.textSecondary,
+  cursor: 'pointer',
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+      color: darkColors.textSecondary,
+    },
+  },
+  ':hover': {
+    borderColor: colors.primary,
+    color: colors.textPrimary,
+  },
+})
+
+export const infoBox = style({
+  padding: spacing[4],
+  backgroundColor: '#eff6ff',
+  border: `1px solid ${colors.primary}40`,
+  borderRadius: borderRadius.md,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: spacing[1],
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: `${darkColors.primary}40`,
+    },
+  },
+})
+
+export const infoTitle = style({
+  fontSize: typography.fontSize.sm,
+  fontWeight: typography.fontWeight.semibold,
+  color: colors.textPrimary,
+  margin: 0,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+    },
+  },
+})
+
+export const infoText = style({
+  fontSize: typography.fontSize.xs,
+  color: colors.textSecondary,
+  margin: 0,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+  },
+})

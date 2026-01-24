@@ -25,6 +25,13 @@ export const Training = () => {
   const [selectedSubTopicId, setSelectedSubTopicId] = useState<number | null>(null)
   
   const getNextStudyQuizMutation = useGetNextStudyQuiz()
+  const {
+    mutate: fetchNextStudyQuiz,
+    reset: resetNextStudyQuiz,
+    isPending: isNextQuizPending,
+    isError: isNextQuizError,
+    error: nextQuizError,
+  } = getNextStudyQuizMutation
   const createWrongAnswerMutation = useCreateWrongAnswer()
   const { setLoading } = useUIStore()
   
@@ -40,21 +47,6 @@ export const Training = () => {
   )
   
   const { data: coreContent, isLoading: isLoadingCoreContent, isError: isCoreContentError } = useCoreContent(selectedSubTopicId)
-
-  // 과목 선택 시 주요항목 초기화
-  useEffect(() => {
-    if (selectedSubjectId) {
-      setSelectedMainTopicId(null)
-      setSelectedSubTopicId(null)
-    }
-  }, [selectedSubjectId])
-
-  // 주요항목 선택 시 세부항목 초기화
-  useEffect(() => {
-    if (selectedMainTopicId) {
-      setSelectedSubTopicId(null)
-    }
-  }, [selectedMainTopicId])
 
   const handleStart = () => {
     if (!selectedSubTopicId) {
@@ -176,11 +168,11 @@ export const Training = () => {
 
   // 503 에러 자동 재시도 (7초 후)
   useEffect(() => {
-    const error = getNextStudyQuizMutation.error as ApiError | undefined
-    if (error?.status === 503 && !getNextStudyQuizMutation.isPending && selectedSubTopicId) {
+    const error = nextQuizError as ApiError | undefined
+    if (error?.status === 503 && !isNextQuizPending && selectedSubTopicId) {
       const retryTimer = setTimeout(() => {
         setLoading(true)
-        getNextStudyQuizMutation.mutate(
+        fetchNextStudyQuiz(
           {
             sub_topic_id: selectedSubTopicId,
             exclude_quiz_ids: seenQuizIds,
@@ -198,11 +190,11 @@ export const Training = () => {
 
       return () => clearTimeout(retryTimer)
     }
-  }, [getNextStudyQuizMutation.error, getNextStudyQuizMutation.isPending, selectedSubTopicId, seenQuizIds, setLoading])
+  }, [fetchNextStudyQuiz, isNextQuizPending, nextQuizError, selectedSubTopicId, seenQuizIds, setLoading])
 
   // 문제가 없으면 시작 화면 표시
   if (quizzes.length === 0) {
-    const error = getNextStudyQuizMutation.error as ApiError | undefined
+    const error = nextQuizError as ApiError | undefined
     const is503Error = error?.status === 503
 
     return (
@@ -225,7 +217,12 @@ export const Training = () => {
                   label: subject.name,
                 }))}
                 placeholder="과목을 선택하세요"
-                onChange={(value) => setSelectedSubjectId(value ? Number(value) : null)}
+                onChange={(value) => {
+                  const nextSubjectId = value ? Number(value) : null
+                  setSelectedSubjectId(nextSubjectId)
+                  setSelectedMainTopicId(null)
+                  setSelectedSubTopicId(null)
+                }}
               />
             </div>
 
@@ -246,7 +243,11 @@ export const Training = () => {
                   }
                   placeholder="주요항목을 선택하세요"
                   disabled={!mainTopicsData}
-                  onChange={(value) => setSelectedMainTopicId(value ? Number(value) : null)}
+                  onChange={(value) => {
+                    const nextMainTopicId = value ? Number(value) : null
+                    setSelectedMainTopicId(nextMainTopicId)
+                    setSelectedSubTopicId(null)
+                  }}
                 />
               </div>
             )}
@@ -307,10 +308,10 @@ export const Training = () => {
                 <button
                   className={styles.retryButton}
                   onClick={() => {
-                    getNextStudyQuizMutation.reset()
+                    resetNextStudyQuiz()
                     if (selectedSubTopicId) {
                       setLoading(true)
-                      getNextStudyQuizMutation.mutate(
+                      fetchNextStudyQuiz(
                         {
                           sub_topic_id: selectedSubTopicId,
                           exclude_quiz_ids: seenQuizIds,
@@ -336,7 +337,7 @@ export const Training = () => {
               className={styles.startButton}
               onClick={handleStart}
               disabled={
-                getNextStudyQuizMutation.isPending ||
+                isNextQuizPending ||
                 !selectedSubTopicId ||
                 isLoadingCoreContent ||
                 isCoreContentError ||
@@ -344,7 +345,7 @@ export const Training = () => {
                 coreContent.core_contents.length === 0
               }
             >
-              {getNextStudyQuizMutation.isPending
+              {isNextQuizPending
                 ? '문제 생성 중...'
                 : isLoadingCoreContent
                   ? '핵심 정보 확인 중...'
@@ -382,20 +383,20 @@ export const Training = () => {
 
       {showAnswer && (
         <div className={styles.footer}>
-          {getNextStudyQuizMutation.isError && (
+          {isNextQuizError && (
             <div className={styles.error}>
               <p className={styles.errorMessage}>
-                {(getNextStudyQuizMutation.error as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
+                {(nextQuizError as { message?: string })?.message || '문제 생성 중 오류가 발생했습니다.'}
               </p>
             </div>
           )}
-          {currentQuizIndex < totalQuestions - 1 || (totalQuestions < 10 && !getNextStudyQuizMutation.isPending) ? (
+          {currentQuizIndex < totalQuestions - 1 || (totalQuestions < 10 && !isNextQuizPending) ? (
             <button
               className={styles.nextButton}
               onClick={handleNext}
-              disabled={getNextStudyQuizMutation.isPending}
+              disabled={isNextQuizPending}
             >
-              {getNextStudyQuizMutation.isPending ? '문제 생성 중...' : '다음 문제'}
+              {isNextQuizPending ? '문제 생성 중...' : '다음 문제'}
             </button>
           ) : totalQuestions >= 10 ? (
             <button

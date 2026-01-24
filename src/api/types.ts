@@ -183,6 +183,67 @@ export interface CreateCoreContentByPathResponse {
   updated_at: string
 }
 
+// 핵심 정보 자동 분류 등록 타입 (2026-01-24 추가)
+export interface CreateCoreContentAutoRequest {
+  core_content: string
+  source_type: 'text' | 'youtube_url'
+}
+
+export interface AutoClassificationCandidate {
+  sub_topic_id: number
+  category_path: string
+  score: number
+  rank: number
+}
+
+export interface CreateCoreContentAutoResponse {
+  id: number
+  run_id?: string
+  category_path: string | null
+  confidence: number | null
+  candidates: AutoClassificationCandidate[]
+  updated_at: string | null
+}
+
+export interface AutoClassificationCategoryRule {
+  sub_topic_id: number
+  weight: number
+  priority: number
+  is_active: boolean
+}
+
+export interface AutoClassificationSettings {
+  min_confidence: number
+  strategy: 'hybrid' | 'similarity_only' | 'keyword_only'
+  keyword_weight: number
+  similarity_weight: number
+  max_candidates: number
+  text_preview_length: number
+  category_rules?: AutoClassificationCategoryRule[]
+}
+
+export interface AutoClassificationPendingItem {
+  run_id: string
+  core_content: string
+  source_type: 'text' | 'youtube_url'
+  confidence: number | null
+  candidates: AutoClassificationCandidate[]
+  created_at?: string
+}
+
+export interface AutoClassificationPendingResponse {
+  pending: AutoClassificationPendingItem[]
+}
+
+export interface AutoClassificationApproveRequest {
+  sub_topic_id: number
+  reason?: string
+}
+
+export interface AutoClassificationRejectRequest {
+  reason?: string
+}
+
 // 문제 검증 타입 (2026-01-23 추가)
 export interface ValidateQuizResponse {
   quiz_id: number

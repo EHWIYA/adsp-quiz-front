@@ -5,6 +5,12 @@ import type {
   SubTopicCoreContentResponse,
   CreateCoreContentRequest,
   UpdateCoreContentRequest,
+  CreateCoreContentAutoRequest,
+  CreateCoreContentAutoResponse,
+  AutoClassificationSettings,
+  AutoClassificationPendingResponse,
+  AutoClassificationApproveRequest,
+  AutoClassificationRejectRequest,
   CreateCoreContentByPathRequest,
   CreateCoreContentByPathResponse,
 } from './types'
@@ -76,6 +82,93 @@ export const useDeleteCoreContent = () => {
       queryClient.removeQueries({ queryKey: ['core-content', variables.subTopicId] })
       // 관련 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['sub-topics'] })
+    },
+  })
+}
+
+// 관리자 API - 핵심 정보 자동 분류 등록
+export const useCreateCoreContentAuto = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateCoreContentAutoRequest): Promise<CreateCoreContentAutoResponse> => {
+      return await apiClient.post<CreateCoreContentAutoResponse>('/api/v1/admin/core-content/auto', data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['core-content'] })
+      queryClient.invalidateQueries({ queryKey: ['sub-topics'] })
+    },
+  })
+}
+
+export const useAutoClassificationSettings = (enabled = true) => {
+  return useQuery({
+    queryKey: ['core-content-auto-settings'],
+    queryFn: async (): Promise<AutoClassificationSettings> => {
+      return await apiClient.get<AutoClassificationSettings>('/api/v1/admin/core-content/auto/settings')
+    },
+    enabled,
+  })
+}
+
+export const useUpdateAutoClassificationSettings = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: AutoClassificationSettings): Promise<AutoClassificationSettings> => {
+      return await apiClient.put<AutoClassificationSettings>('/api/v1/admin/core-content/auto/settings', data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['core-content-auto-settings'] })
+    },
+  })
+}
+
+export const useAutoClassificationPending = () => {
+  return useQuery({
+    queryKey: ['core-content-auto-pending'],
+    queryFn: async (): Promise<AutoClassificationPendingResponse> => {
+      return await apiClient.get<AutoClassificationPendingResponse>('/api/v1/admin/core-content/auto/pending')
+    },
+  })
+}
+
+export const useApproveAutoClassification = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      runId,
+      data,
+    }: {
+      runId: string
+      data: AutoClassificationApproveRequest
+    }): Promise<void> => {
+      await apiClient.post(`/api/v1/admin/core-content/auto/${runId}/approve`, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['core-content-auto-pending'] })
+      queryClient.invalidateQueries({ queryKey: ['core-content'] })
+      queryClient.invalidateQueries({ queryKey: ['sub-topics'] })
+    },
+  })
+}
+
+export const useRejectAutoClassification = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      runId,
+      data,
+    }: {
+      runId: string
+      data: AutoClassificationRejectRequest
+    }): Promise<void> => {
+      await apiClient.post(`/api/v1/admin/core-content/auto/${runId}/reject`, data)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['core-content-auto-pending'] })
     },
   })
 }

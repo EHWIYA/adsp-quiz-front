@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as styles from './Exam.css'
 import { Timer } from '../../components/Timer/Timer'
@@ -18,81 +18,23 @@ export const Exam = () => {
   
   const startExamMutation = useStartExam()
   const submitExamMutation = useSubmitExam()
+  const {
+    data: startExamData,
+    isPending: isStartExamPending,
+    isError: isStartExamError,
+    error: startExamError,
+    mutate: startExamMutate,
+    reset: resetStartExam,
+  } = startExamMutation
+  const {
+    mutate: submitExamMutate,
+    isPending: isSubmitPending,
+  } = submitExamMutation
 
-  useEffect(() => {
-    // examSessionId가 없고, 로딩 중이 아니며, 데이터도 없고, 에러도 없을 때만 요청
-    if (!examSessionId && !startExamMutation.isPending && !startExamMutation.data && !startExamMutation.isError) {
-      setLoading(true)
-      startExamMutation.mutate(
-        { 
-          subjectId: 1,
-          quizCount: 10 
-        },
-        {
-          onSuccess: (data) => {
-            startExam(data.examSessionId)
-            start(data.timeLimit)
-            setLoading(false)
-          },
-          onError: () => {
-            setLoading(false)
-          },
-        }
-      )
-    }
-  }, [examSessionId, startExamMutation.isPending, startExamMutation.data, startExamMutation.isError, startExam, start, setLoading])
+  const handleSubmit = useCallback(() => {
+    if (!examSessionId || !startExamData) return
 
-  useEffect(() => {
-    if (!isRunning || seconds <= 0) return
-
-    const interval = window.setInterval(() => {
-      tick()
-      const currentSeconds = useTimerStore.getState().seconds
-      if (currentSeconds <= 0) {
-        handleTimeUp()
-      }
-    }, 1000)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [isRunning, seconds])
-
-  const handlePause = () => {
-    pause()
-  }
-
-  const handleResume = () => {
-    resume()
-  }
-
-  const handleTimeUp = () => {
-    handleSubmit()
-  }
-
-  const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex)
-  }
-
-  const handleNext = () => {
-    if (startExamMutation.data && selectedAnswer !== undefined) {
-      const currentQuiz = startExamMutation.data.quizzes[currentQuizIndex]
-      if (currentQuiz) {
-        const isCorrect = currentQuiz.correctAnswer === selectedAnswer
-        addAnswer(currentQuiz.id, selectedAnswer, isCorrect)
-      }
-      
-      if (currentQuizIndex < startExamMutation.data.quizzes.length - 1) {
-        setCurrentQuizIndex(currentQuizIndex + 1)
-        setSelectedAnswer(undefined)
-      }
-    }
-  }
-
-  const handleSubmit = () => {
-    if (!examSessionId || !startExamMutation.data) return
-
-    const allAnswers = startExamMutation.data.quizzes.map((quiz) => {
+    const allAnswers = startExamData.quizzes.map((quiz) => {
       const answer = answers.find((a) => a.quizId === quiz.id)
       return {
         quizId: quiz.id,
@@ -101,7 +43,7 @@ export const Exam = () => {
     })
 
     setLoading(true)
-    submitExamMutation.mutate(
+    submitExamMutate(
       {
         examSessionId,
         answers: allAnswers,
@@ -117,9 +59,79 @@ export const Exam = () => {
         },
       }
     )
+  }, [answers, examSessionId, navigate, resetExam, setLoading, startExamData, submitExamMutate])
+
+  const handleTimeUp = useCallback(() => {
+    handleSubmit()
+  }, [handleSubmit])
+
+  useEffect(() => {
+    // examSessionId가 없고, 로딩 중이 아니며, 데이터도 없고, 에러도 없을 때만 요청
+    if (!examSessionId && !isStartExamPending && !startExamData && !isStartExamError) {
+      setLoading(true)
+      startExamMutate(
+        {
+          subjectId: 1,
+          quizCount: 10,
+        },
+        {
+          onSuccess: (data) => {
+            startExam(data.examSessionId)
+            start(data.timeLimit)
+            setLoading(false)
+          },
+          onError: () => {
+            setLoading(false)
+          },
+        }
+      )
+    }
+  }, [examSessionId, isStartExamPending, isStartExamError, startExamData, startExam, start, setLoading, startExamMutate])
+
+  useEffect(() => {
+    if (!isRunning || seconds <= 0) return
+
+    const interval = window.setInterval(() => {
+      tick()
+      const currentSeconds = useTimerStore.getState().seconds
+      if (currentSeconds <= 0) {
+        handleTimeUp()
+      }
+    }, 1000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [handleTimeUp, isRunning, seconds, tick])
+
+  const handlePause = () => {
+    pause()
   }
 
-  if (startExamMutation.isPending) {
+  const handleResume = () => {
+    resume()
+  }
+
+  const handleAnswerSelect = (answerIndex: number) => {
+    setSelectedAnswer(answerIndex)
+  }
+
+  const handleNext = () => {
+    if (startExamData && selectedAnswer !== undefined) {
+      const currentQuiz = startExamData.quizzes[currentQuizIndex]
+      if (currentQuiz) {
+        const isCorrect = currentQuiz.correctAnswer === selectedAnswer
+        addAnswer(currentQuiz.id, selectedAnswer, isCorrect)
+      }
+      
+      if (currentQuizIndex < startExamData.quizzes.length - 1) {
+        setCurrentQuizIndex(currentQuizIndex + 1)
+        setSelectedAnswer(undefined)
+      }
+    }
+  }
+
+  if (isStartExamPending) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>시험 준비 중...</div>
@@ -127,8 +139,8 @@ export const Exam = () => {
     )
   }
 
-  if (startExamMutation.isError) {
-    const error = startExamMutation.error as { message?: string; code?: string; details?: unknown }
+  if (isStartExamError) {
+    const error = startExamError as { message?: string; code?: string; details?: unknown }
     const statusCode = error.code || ''
     const isServerError = statusCode.includes('500') || statusCode.includes('HTTP_500')
     const isNotFound = statusCode.includes('404') || statusCode.includes('HTTP_404')
@@ -185,7 +197,7 @@ export const Exam = () => {
             <p>{error.message || '알 수 없는 오류가 발생했습니다.'}</p>
           )}
           <button onClick={() => {
-            startExamMutation.reset()
+            resetStartExam()
             window.location.reload()
           }}>
             다시 시도
@@ -195,12 +207,12 @@ export const Exam = () => {
     )
   }
 
-  if (!startExamMutation.data) {
+  if (!startExamData) {
     return null
   }
 
-  const currentQuiz = startExamMutation.data.quizzes[currentQuizIndex]
-  const totalQuestions = startExamMutation.data.quizzes.length
+  const currentQuiz = startExamData.quizzes[currentQuizIndex]
+  const totalQuestions = startExamData.quizzes.length
   const progress = ((currentQuizIndex + 1) / totalQuestions) * 100
 
   return (
@@ -251,9 +263,9 @@ export const Exam = () => {
           <button
             className={styles.submitButton}
             onClick={handleSubmit}
-            disabled={submitExamMutation.isPending}
+            disabled={isSubmitPending}
           >
-            {submitExamMutation.isPending ? '제출 중...' : '시험 제출'}
+            {isSubmitPending ? '제출 중...' : '시험 제출'}
           </button>
         )}
       </div>

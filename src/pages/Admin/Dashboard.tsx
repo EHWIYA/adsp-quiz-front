@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import * as styles from './Dashboard.css'
 import { useQuizDashboard } from '../../api/quiz'
 import type { ApiError, QuizDashboardResponse } from '../../api/types'
@@ -65,7 +65,7 @@ const buildCategoryHierarchy = (dashboard: QuizDashboardResponse): Map<string, M
 
 export const Dashboard = () => {
   const { data: dashboard, isLoading, isError, error } = useQuizDashboard()
-  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set())
+  const [collapsedSubjects, setCollapsedSubjects] = useState<Set<string>>(new Set())
   const [expandedMainTopics, setExpandedMainTopics] = useState<Set<string>>(new Set())
   
   // 3단계 드롭다운 선택 상태
@@ -113,66 +113,48 @@ export const Dashboard = () => {
     if (!dashboard) return new Map<string, Map<string, CategoryHierarchy[]>>()
     return buildCategoryHierarchy(dashboard)
   }, [dashboard])
-  
-  // dashboard가 로드되면 모든 과목을 펼친 상태로 설정
-  useEffect(() => {
-    if (dashboard && categoryHierarchy.size > 0) {
-      const allSubjects = new Set(Array.from(categoryHierarchy.keys()))
-      setExpandedSubjects(allSubjects)
-    }
-  }, [dashboard, categoryHierarchy])
-  
-  // 과목 선택 시 하위 선택 초기화
-  useEffect(() => {
-    if (selectedSubjectId) {
-      setSelectedMainTopicId(null)
-      setSelectedSubTopicId(null)
-    }
-  }, [selectedSubjectId])
-  
-  // 주요항목 선택 시 세부항목 초기화
-  useEffect(() => {
-    if (selectedMainTopicId) {
-      setSelectedSubTopicId(null)
-    }
-  }, [selectedMainTopicId])
-  
-  // 드롭다운 선택 시 트리에서 해당 노드로 스크롤 및 자동 펼치기
-  useEffect(() => {
-    if (!selectedSubjectId || !dashboard) return
-    
-    const subject = SUBJECT_CATEGORIES.find((s) => s.id === selectedSubjectId)
-    if (!subject) return
-    
-    const subjectName = subject.name
-    
-    // 과목 노드 펼치기
-    setExpandedSubjects((prev) => new Set([...prev, subjectName]))
-    
-    // 과목 노드로 스크롤
+
+  const allSubjectNames = useMemo(() => {
+    return new Set(Array.from(categoryHierarchy.keys()))
+  }, [categoryHierarchy])
+
+  const expandedSubjects = useMemo(() => {
+    if (allSubjectNames.size === 0) return new Set<string>()
+    const expanded = new Set<string>()
+    allSubjectNames.forEach((name) => {
+      if (!collapsedSubjects.has(name)) {
+        expanded.add(name)
+      }
+    })
+    return expanded
+  }, [allSubjectNames, collapsedSubjects])
+
+  const ensureSubjectExpanded = (subjectName: string) => {
+    setCollapsedSubjects((prev) => {
+      if (!prev.has(subjectName)) return prev
+      const next = new Set(prev)
+      next.delete(subjectName)
+      return next
+    })
+  }
+
+  const scrollToSubjectNode = (subjectName: string) => {
     setTimeout(() => {
       const subjectNode = treeNodeRefs.current.get(`subject-${subjectName}`)
       if (subjectNode) {
         subjectNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
     }, 100)
-    
-    // 주요항목이 선택된 경우
-    if (selectedMainTopicId) {
-      const mainTopic = subject.mainTopics.find((mt) => mt.id === selectedMainTopicId)
-      if (mainTopic) {
-        const mainTopicKey = `${subjectName}-${mainTopic.name}`
-        setExpandedMainTopics((prev) => new Set([...prev, mainTopicKey]))
-        
-        setTimeout(() => {
-          const mainTopicNode = treeNodeRefs.current.get(`mainTopic-${mainTopicKey}`)
-          if (mainTopicNode) {
-            mainTopicNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
-        }, 200)
+  }
+
+  const scrollToMainTopicNode = (mainTopicKey: string) => {
+    setTimeout(() => {
+      const mainTopicNode = treeNodeRefs.current.get(`mainTopic-${mainTopicKey}`)
+      if (mainTopicNode) {
+        mainTopicNode.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-    }
-  }, [selectedSubjectId, selectedMainTopicId, dashboard])
+    }, 200)
+  }
 
   if (isLoading) {
     return (
@@ -205,13 +187,15 @@ export const Dashboard = () => {
   }
   
   const toggleSubject = (subjectName: string) => {
-    const newExpanded = new Set(expandedSubjects)
-    if (newExpanded.has(subjectName)) {
-      newExpanded.delete(subjectName)
-    } else {
-      newExpanded.add(subjectName)
-    }
-    setExpandedSubjects(newExpanded)
+    setCollapsedSubjects((prev) => {
+      const next = new Set(prev)
+      if (next.has(subjectName)) {
+        next.delete(subjectName)
+      } else {
+        next.add(subjectName)
+      }
+      return next
+    })
   }
   
   const toggleMainTopic = (key: string) => {
@@ -315,8 +299,18 @@ export const Dashboard = () => {
                 onChange={(value) => {
                   if (value === 'all') {
                     setSelectedSubjectId(null)
-                  } else {
-                    setSelectedSubjectId(value as number)
+                    setSelectedMainTopicId(null)
+                    setSelectedSubTopicId(null)
+                    return
+                  }
+                  const nextSubjectId = Number(value)
+                  setSelectedSubjectId(nextSubjectId)
+                  setSelectedMainTopicId(null)
+                  setSelectedSubTopicId(null)
+                  const subjectName = getSubjectNameById(nextSubjectId)
+                  if (subjectName) {
+                    ensureSubjectExpanded(subjectName)
+                    scrollToSubjectNode(subjectName)
                   }
                 }}
               />
@@ -341,8 +335,24 @@ export const Dashboard = () => {
                   onChange={(value) => {
                     if (value === 'all') {
                       setSelectedMainTopicId(null)
-                    } else {
-                      setSelectedMainTopicId(value as number)
+                      setSelectedSubTopicId(null)
+                      return
+                    }
+                    const nextMainTopicId = Number(value)
+                    setSelectedMainTopicId(nextMainTopicId)
+                    setSelectedSubTopicId(null)
+                    if (selectedSubjectId) {
+                      const subjectName = getSubjectNameById(selectedSubjectId)
+                      const mainTopicName = getMainTopicNameById(selectedSubjectId, nextMainTopicId)
+                      if (subjectName) {
+                        ensureSubjectExpanded(subjectName)
+                        scrollToSubjectNode(subjectName)
+                      }
+                      if (subjectName && mainTopicName) {
+                        const mainTopicKey = `${subjectName}-${mainTopicName}`
+                        setExpandedMainTopics((prev) => new Set([...prev, mainTopicKey]))
+                        scrollToMainTopicNode(mainTopicKey)
+                      }
                     }
                   }}
                 />
@@ -369,7 +379,7 @@ export const Dashboard = () => {
                     if (value === 'all') {
                       setSelectedSubTopicId(null)
                     } else {
-                      setSelectedSubTopicId(value as number)
+                      setSelectedSubTopicId(Number(value))
                     }
                   }}
                 />
