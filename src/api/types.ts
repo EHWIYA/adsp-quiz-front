@@ -222,6 +222,63 @@ export interface QuizDashboardResponse {
   quizzes_needing_validation: QuizResponse[]
 }
 
+// 오답노트 타입 (2026-01-24 추가)
+export interface CreateWrongAnswerRequest {
+  quiz_id: number
+  question: string
+  options: string[]
+  selected_answer: number
+  correct_answer: number
+  explanation?: string
+  subject_id?: number
+  sub_topic_id?: number
+  created_at?: string
+}
+
+export interface WrongAnswerResponse {
+  id: number
+  quiz_id: number
+  question: string
+  options: string[]
+  selected_answer: number
+  correct_answer: number
+  explanation?: string
+  subject_id?: number
+  sub_topic_id?: number
+  created_at: string
+  saved_at: string
+  updated_at?: string
+}
+
+export interface WrongAnswersListResponse {
+  wrong_answers: WrongAnswerResponse[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
+
+export interface WrongAnswersStatsResponse {
+  total_count: number
+  by_subject: Record<string, number>
+  by_sub_topic: Record<string, number>
+  recent_count: number
+}
+
+export interface DeleteWrongAnswersRequest {
+  ids: number[]
+}
+
+export interface DeleteWrongAnswerResponse {
+  message: string
+  id: number
+}
+
+export interface DeleteWrongAnswersResponse {
+  message: string
+  deleted_count: number
+}
+
 export interface ApiError {
   message: string
   code?: string

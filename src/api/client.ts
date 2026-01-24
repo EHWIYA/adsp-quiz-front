@@ -136,8 +136,13 @@ class ApiClient {
     })
   }
 
-  async delete<T>(path: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>(path, { ...options, method: 'DELETE' })
+  async delete<T>(path: string, data?: unknown, options?: RequestOptions): Promise<T> {
+    const transformedData = data ? toSnakeCase(data) : undefined
+    return this.request<T>(path, {
+      ...options,
+      method: 'DELETE',
+      body: transformedData ? JSON.stringify(transformedData) : undefined,
+    })
   }
 }
 

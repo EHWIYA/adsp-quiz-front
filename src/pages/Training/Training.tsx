@@ -6,11 +6,14 @@ import { useCoreContent } from '../../api/coreContent'
 import { SUBJECT_CATEGORIES, getMainTopics, getSubTopics } from '../../data/subjectCategories'
 import { Dropdown } from '../../components/Dropdown/Dropdown'
 import { useUIStore } from '../../store/uiStore'
+import { useCreateWrongAnswer } from '../../api/wrongAnswer'
+import { apiClient } from '../../api/client'
 import type { Quiz } from '../../components/QuizCard/QuizCard.types'
-import type { ApiError } from '../../api/types'
+import type { ApiError, QuizResponse } from '../../api/types'
 
 export const Training = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [quizResponses, setQuizResponses] = useState<QuizResponse[]>([]) // 원본 QuizResponse 저장
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>()
   const [showAnswer, setShowAnswer] = useState(false)
@@ -22,6 +25,7 @@ export const Training = () => {
   const [selectedSubTopicId, setSelectedSubTopicId] = useState<number | null>(null)
   
   const getNextStudyQuizMutation = useGetNextStudyQuiz()
+  const createWrongAnswerMutation = useCreateWrongAnswer()
   const { setLoading } = useUIStore()
   
   // 하드코딩된 분류 데이터 사용 (2026-01-20 변경)
@@ -59,34 +63,66 @@ export const Training = () => {
 
     // 초기화
     setQuizzes([])
+    setQuizResponses([])
     setCurrentQuizIndex(0)
     setSelectedAnswer(undefined)
     setShowAnswer(false)
     setSeenQuizIds([])
 
     // 첫 번째 문제 요청
-      setLoading(true)
-      getNextStudyQuizMutation.mutate(
-        {
-          sub_topic_id: selectedSubTopicId,
-        },
-        {
-          onSuccess: (quiz) => {
-            setQuizzes([quiz])
-            setCurrentQuizIndex(0)
-            setSeenQuizIds([Number(quiz.id)])
-            setLoading(false)
-          },
-          onError: () => {
-            setLoading(false)
-          },
+    setLoading(true)
+    // 원본 QuizResponse를 가져오기 위해 직접 API 호출
+    const queryParams = new URLSearchParams({
+      sub_topic_id: String(selectedSubTopicId),
+    })
+    apiClient.get<QuizResponse>(`/api/v1/quiz/study/next?${queryParams.toString()}`)
+      .then((response) => {
+        // 원본 응답 저장
+        setQuizResponses([response])
+        // 프론트엔드 형식으로 변환하여 저장
+        const quiz: Quiz = {
+          id: String(response.id),
+          question: response.question,
+          options: response.options.map((option) => option.text),
+          correctAnswer: response.correct_answer,
+          explanation: response.explanation,
         }
-      )
+        setQuizzes([quiz])
+        setCurrentQuizIndex(0)
+        setSeenQuizIds([response.id])
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoading(false)
+      })
   }
 
   const handleAnswerSelect = (answerIndex: number) => {
     setSelectedAnswer(answerIndex)
     setShowAnswer(true)
+    
+    // 틀린 문제인 경우 오답노트에 자동 저장
+    const currentQuiz = quizzes[currentQuizIndex]
+    const currentQuizResponse = quizResponses[currentQuizIndex]
+    
+    if (currentQuiz && currentQuizResponse && currentQuiz.correctAnswer !== undefined) {
+      const isCorrect = currentQuiz.correctAnswer === answerIndex
+      
+      if (!isCorrect && selectedSubjectId && selectedSubTopicId) {
+        // 틀린 문제인 경우 오답 저장
+        createWrongAnswerMutation.mutate({
+          quiz_id: currentQuizResponse.id,
+          question: currentQuizResponse.question,
+          options: currentQuizResponse.options.map((option) => option.text),
+          selected_answer: answerIndex,
+          correct_answer: currentQuizResponse.correct_answer,
+          explanation: currentQuizResponse.explanation,
+          subject_id: currentQuizResponse.subject_id,
+          sub_topic_id: selectedSubTopicId,
+          created_at: currentQuizResponse.created_at,
+        })
+      }
+    }
   }
 
   const handleNext = () => {
@@ -106,28 +142,35 @@ export const Training = () => {
     if (quizzes.length < 10) {
       // 로딩을 먼저 시작 (비동기 작업 시작 전 즉시 피드백)
       setLoading(true)
-      getNextStudyQuizMutation.mutate(
-        {
-          sub_topic_id: selectedSubTopicId,
-          exclude_quiz_ids: seenQuizIds,
-        },
-        {
-          onSuccess: (quiz) => {
-            setQuizzes([...quizzes, quiz])
-            setCurrentQuizIndex(quizzes.length)
-            setSeenQuizIds([...seenQuizIds, Number(quiz.id)])
-            setSelectedAnswer(undefined)
-            setShowAnswer(false)
-          },
-          onError: () => {
-            // 에러 발생 시에도 로딩 해제
-            setLoading(false)
-          },
-          onSettled: () => {
-            setLoading(false)
-          },
-        }
-      )
+      // 원본 QuizResponse를 가져오기 위해 직접 API 호출
+      const queryParams = new URLSearchParams({
+        sub_topic_id: String(selectedSubTopicId),
+      })
+      if (seenQuizIds.length > 0) {
+        queryParams.append('exclude_quiz_ids', seenQuizIds.join(','))
+      }
+      apiClient.get<QuizResponse>(`/api/v1/quiz/study/next?${queryParams.toString()}`)
+        .then((response) => {
+          // 원본 응답 저장
+          setQuizResponses([...quizResponses, response])
+          // 프론트엔드 형식으로 변환하여 저장
+          const quiz: Quiz = {
+            id: String(response.id),
+            question: response.question,
+            options: response.options.map((option) => option.text),
+            correctAnswer: response.correct_answer,
+            explanation: response.explanation,
+          }
+          setQuizzes([...quizzes, quiz])
+          setCurrentQuizIndex(quizzes.length)
+          setSeenQuizIds([...seenQuizIds, response.id])
+          setSelectedAnswer(undefined)
+          setShowAnswer(false)
+          setLoading(false)
+        })
+        .catch(() => {
+          setLoading(false)
+        })
     }
   }
 
@@ -359,6 +402,7 @@ export const Training = () => {
               className={styles.startButton}
               onClick={() => {
                 setQuizzes([])
+                setQuizResponses([])
                 setCurrentQuizIndex(0)
                 setSelectedAnswer(undefined)
                 setShowAnswer(false)
