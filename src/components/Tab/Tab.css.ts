@@ -6,6 +6,7 @@ export const tabContainer = style({
   gap: spacing[2],
   borderBottom: `2px solid ${colors.gray200}`,
   marginBottom: spacing[6],
+  flexWrap: 'wrap',
   selectors: {
     '.dark &': {
       borderBottomColor: darkColors.gray700,
@@ -14,7 +15,7 @@ export const tabContainer = style({
 })
 
 export const tabButton = style({
-  padding: `${spacing[3]} ${spacing[6]}`,
+  padding: `${spacing[3]} ${spacing[4]}`,
   fontSize: typography.fontSize.base,
   fontWeight: typography.fontWeight.medium,
   color: colors.textSecondary,
@@ -25,9 +26,11 @@ export const tabButton = style({
   cursor: 'pointer',
   transition: 'all 0.2s ease-in-out',
   marginBottom: '-2px',
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  whiteSpace: 'normal',
+  wordBreak: 'keep-all',
+  overflowWrap: 'break-word',
+  minWidth: 'fit-content',
+  flexShrink: 0,
   ':hover': {
     color: colors.primary,
     backgroundColor: colors.gray50,

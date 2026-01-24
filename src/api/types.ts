@@ -188,6 +188,11 @@ export interface ValidateQuizResponse {
   quiz_id: number
   is_valid: boolean
   category: string
+  /**
+   * 검증 점수 (0.0 ~ 1.0 범위의 float 값)
+   * 예: 0.95 = 95점
+   * 프론트엔드에서는 Math.round(validation_score * 100)으로 백분율 표시
+   */
   validation_score: number
   feedback: string
   issues: string[]
@@ -211,6 +216,7 @@ export interface RequestCorrectionResponse {
 export interface QuizDashboardResponse {
   total_quizzes: number
   quizzes_by_category: Record<string, number>
+  category_status?: Record<string, 'normal' | 'insufficient' | 'production_difficult'> // 2026-01-24 추가: 카테고리 상태
   validation_status: Record<string, number>
   recent_quizzes: QuizResponse[]
   quizzes_needing_validation: QuizResponse[]
