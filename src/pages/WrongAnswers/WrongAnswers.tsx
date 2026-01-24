@@ -36,14 +36,6 @@ export const WrongAnswers = () => {
   }
   
   const handleStudy = (wrongAnswer: WrongAnswerResponse) => {
-    // 오답노트 항목을 Quiz 형식으로 변환
-    const quiz: Quiz = {
-      id: String(wrongAnswer.quiz_id),
-      question: wrongAnswer.question,
-      options: wrongAnswer.options,
-      correctAnswer: wrongAnswer.correct_answer,
-      explanation: wrongAnswer.explanation,
-    }
     setSelectedWrongAnswer(wrongAnswer)
     setSelectedAnswer(wrongAnswer.selected_answer)
     setShowAnswer(true)
