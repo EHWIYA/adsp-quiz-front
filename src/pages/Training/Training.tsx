@@ -65,24 +65,23 @@ export const Training = () => {
     setSeenQuizIds([])
 
     // 첫 번째 문제 요청
-    getNextStudyQuizMutation.mutate(
-      {
-        sub_topic_id: selectedSubTopicId,
-      },
-      {
-        onMutate: () => {
-          setLoading(true)
+      setLoading(true)
+      getNextStudyQuizMutation.mutate(
+        {
+          sub_topic_id: selectedSubTopicId,
         },
-        onSuccess: (quiz) => {
-          setQuizzes([quiz])
-          setCurrentQuizIndex(0)
-          setSeenQuizIds([Number(quiz.id)])
-        },
-        onSettled: () => {
-          setLoading(false)
-        },
-      }
-    )
+        {
+          onSuccess: (quiz) => {
+            setQuizzes([quiz])
+            setCurrentQuizIndex(0)
+            setSeenQuizIds([Number(quiz.id)])
+            setLoading(false)
+          },
+          onError: () => {
+            setLoading(false)
+          },
+        }
+      )
   }
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -137,16 +136,17 @@ export const Training = () => {
     const error = getNextStudyQuizMutation.error as ApiError | undefined
     if (error?.status === 503 && !getNextStudyQuizMutation.isPending && selectedSubTopicId) {
       const retryTimer = setTimeout(() => {
+        setLoading(true)
         getNextStudyQuizMutation.mutate(
           {
             sub_topic_id: selectedSubTopicId,
             exclude_quiz_ids: seenQuizIds,
           },
           {
-            onMutate: () => {
-              setLoading(true)
+            onSuccess: () => {
+              setLoading(false)
             },
-            onSettled: () => {
+            onError: () => {
               setLoading(false)
             },
           }
@@ -266,16 +266,17 @@ export const Training = () => {
                   onClick={() => {
                     getNextStudyQuizMutation.reset()
                     if (selectedSubTopicId) {
+                      setLoading(true)
                       getNextStudyQuizMutation.mutate(
                         {
                           sub_topic_id: selectedSubTopicId,
                           exclude_quiz_ids: seenQuizIds,
                         },
                         {
-                          onMutate: () => {
-                            setLoading(true)
+                          onSuccess: () => {
+                            setLoading(false)
                           },
-                          onSettled: () => {
+                          onError: () => {
                             setLoading(false)
                           },
                         }

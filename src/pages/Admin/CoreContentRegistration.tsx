@@ -105,6 +105,7 @@ export const CoreContentRegistration = () => {
     const finalSourceType = detectSourceType(content)
 
     // 새로운 경로 기반 API 사용 (2026-01-23 변경: PUT → POST)
+    setLoading(true)
     createByPathMutation.mutate(
       {
         mainTopicId: selectedMainTopicId,
@@ -115,9 +116,6 @@ export const CoreContentRegistration = () => {
         },
       },
       {
-        onMutate: () => {
-          setLoading(true)
-        },
         onSuccess: () => {
           alert('핵심 정보가 등록되었습니다.')
           // 등록 성공 후 홈으로 이동
@@ -141,8 +139,6 @@ export const CoreContentRegistration = () => {
           } else {
             alert(apiError.message || apiError.code || '오류가 발생했습니다.')
           }
-        },
-        onSettled: () => {
           setLoading(false)
         },
       }

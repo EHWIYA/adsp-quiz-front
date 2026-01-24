@@ -19,21 +19,18 @@ export const QuizManagement = () => {
     setValidatingQuizId(quizId)
     setValidationResult(null)
     
+    setLoading(true)
     validateQuizMutation.mutate(quizId, {
-      onMutate: () => {
-        setLoading(true)
-      },
       onSuccess: (result) => {
         setValidationResult({ quizId, result })
         
         // 백엔드에서 검증 상태를 업데이트했으므로 대시보드 데이터 새로고침
         // 백엔드가 quizzes_needing_validation에서 유효 판정 받은 문제를 자동으로 제외함
         refetch()
+        setLoading(false)
       },
       onError: () => {
         setValidatingQuizId(null)
-      },
-      onSettled: () => {
         setLoading(false)
       },
     })

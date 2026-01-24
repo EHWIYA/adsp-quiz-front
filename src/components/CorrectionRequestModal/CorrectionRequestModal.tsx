@@ -29,6 +29,7 @@ export const CorrectionRequestModal = ({
       return
     }
 
+    setLoading(true)
     requestCorrectionMutation.mutate(
       {
         quizId,
@@ -38,9 +39,6 @@ export const CorrectionRequestModal = ({
         },
       },
       {
-        onMutate: () => {
-          setLoading(true)
-        },
         onSuccess: (response) => {
           if (response.is_valid_request) {
             alert('수정 요청이 성공적으로 제출되었습니다.')
@@ -51,12 +49,11 @@ export const CorrectionRequestModal = ({
           } else {
             alert(`수정 요청이 유효하지 않습니다: ${response.validation_feedback}`)
           }
+          setLoading(false)
         },
         onError: (error) => {
           const apiError = error as ApiError
           alert(apiError.message || '수정 요청 제출 중 오류가 발생했습니다.')
-        },
-        onSettled: () => {
           setLoading(false)
         },
       }

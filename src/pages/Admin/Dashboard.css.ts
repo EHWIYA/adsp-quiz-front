@@ -391,9 +391,10 @@ export const treeNodeHeader = style({
   },
   selectors: {
     '.dark &': {
-      ':hover': {
-        backgroundColor: darkColors.gray700,
-      },
+      backgroundColor: darkColors.backgroundSecondary,
+    },
+    '.dark &:hover': {
+      backgroundColor: darkColors.gray700,
     },
   },
 })

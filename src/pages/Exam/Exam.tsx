@@ -22,20 +22,19 @@ export const Exam = () => {
   useEffect(() => {
     // examSessionId가 없고, 로딩 중이 아니며, 데이터도 없고, 에러도 없을 때만 요청
     if (!examSessionId && !startExamMutation.isPending && !startExamMutation.data && !startExamMutation.isError) {
+      setLoading(true)
       startExamMutation.mutate(
         { 
           subjectId: 1,
           quizCount: 10 
         },
         {
-          onMutate: () => {
-            setLoading(true)
-          },
           onSuccess: (data) => {
             startExam(data.examSessionId)
             start(data.timeLimit)
+            setLoading(false)
           },
-          onSettled: () => {
+          onError: () => {
             setLoading(false)
           },
         }
@@ -101,20 +100,19 @@ export const Exam = () => {
       }
     })
 
+    setLoading(true)
     submitExamMutation.mutate(
       {
         examSessionId,
         answers: allAnswers,
       },
       {
-        onMutate: () => {
-          setLoading(true)
-        },
         onSuccess: () => {
           resetExam()
           navigate(`/exam/result/${examSessionId}`)
+          setLoading(false)
         },
-        onSettled: () => {
+        onError: () => {
           setLoading(false)
         },
       }

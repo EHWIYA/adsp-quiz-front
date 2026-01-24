@@ -1,5 +1,5 @@
 import { style, keyframes } from '@vanilla-extract/css'
-import { spacing, borderRadius } from '../../styles/theme'
+import { borderRadius } from '../../styles/theme'
 
 // 스피너 회전 애니메이션
 const spin = keyframes({
