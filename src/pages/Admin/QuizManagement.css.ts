@@ -416,3 +416,189 @@ export const helperText = style({
     },
   },
 })
+
+// 요약 대시보드
+export const summaryDashboard = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+  gap: spacing[4],
+  marginBottom: spacing[6],
+})
+
+export const summaryCard = style({
+  padding: spacing[4],
+  backgroundColor: colors.white,
+  border: `1px solid ${colors.gray200}`,
+  borderRadius: borderRadius.lg,
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease-in-out',
+  ':hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  },
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+    },
+  },
+})
+
+export const summaryCardPrimary = style({
+  backgroundColor: colors.primary + '10',
+  borderColor: colors.primary,
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.primary + '20',
+      borderColor: darkColors.primary,
+    },
+  },
+})
+
+export const summaryCardWarning = style({
+  backgroundColor: (colors.error || '#ef4444') + '10',
+  borderColor: colors.error || '#ef4444',
+  selectors: {
+    '.dark &': {
+      backgroundColor: (darkColors.error || '#ef4444') + '20',
+      borderColor: darkColors.error || '#ef4444',
+    },
+  },
+})
+
+export const summaryLabel = style({
+  fontSize: typography.fontSize.sm,
+  color: colors.textSecondary,
+  marginBottom: spacing[2],
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+  },
+})
+
+export const summaryValue = style({
+  fontSize: typography.fontSize.xl,
+  fontWeight: typography.fontWeight.bold,
+  color: colors.textPrimary,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+    },
+  },
+})
+
+// 필터
+export const filters = style({
+  display: 'flex',
+  gap: spacing[4],
+  marginBottom: spacing[6],
+  alignItems: 'center',
+  flexWrap: 'wrap',
+})
+
+export const searchInput = style({
+  flex: 1,
+  minWidth: '200px',
+  padding: `${spacing[3]} ${spacing[4]}`,
+  fontSize: typography.fontSize.base,
+  color: colors.textPrimary,
+  backgroundColor: colors.white,
+  border: `1px solid ${colors.gray300}`,
+  borderRadius: borderRadius.md,
+  transition: 'all 0.2s ease-in-out',
+  ':focus': {
+    outline: 'none',
+    borderColor: colors.primary,
+    boxShadow: `0 0 0 3px ${colors.primary}20`,
+  },
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+      color: darkColors.textPrimary,
+    },
+    '.dark &:focus': {
+      borderColor: darkColors.primary,
+      boxShadow: `0 0 0 3px ${darkColors.primary}20`,
+    },
+  },
+})
+
+export const categoryFilter = style({
+  minWidth: '200px',
+})
+
+// 문제 목록 헤더
+export const quizListHeader = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: spacing[4],
+})
+
+export const quizCount = style({
+  fontSize: typography.fontSize.sm,
+  color: colors.textSecondary,
+  fontWeight: typography.fontWeight.medium,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+  },
+})
+
+// 문제 카드 개선
+export const quizCardNeedsValidation = style({
+  borderLeft: `4px solid ${colors.error || '#ef4444'}`,
+  selectors: {
+    '.dark &': {
+      borderLeftColor: darkColors.error || '#ef4444',
+    },
+  },
+})
+
+export const quizHeaderLeft = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: spacing[3],
+  flexWrap: 'wrap',
+})
+
+export const quizCategory = style({
+  fontSize: typography.fontSize.xs,
+  color: colors.textSecondary,
+  backgroundColor: colors.gray100,
+  padding: `${spacing[1]} ${spacing[2]}`,
+  borderRadius: borderRadius.sm,
+  fontWeight: typography.fontWeight.medium,
+  border: `1px solid ${colors.gray300}`,
+  selectors: {
+    '.dark &': {
+      color: darkColors.textPrimary,
+      backgroundColor: darkColors.gray300,
+      borderColor: darkColors.gray400,
+    },
+  },
+})
+
+export const validationBadge = style({
+  fontSize: typography.fontSize.xs,
+  fontWeight: typography.fontWeight.semibold,
+  color: colors.error || '#ef4444',
+  backgroundColor: (colors.error || '#ef4444') + '20',
+  padding: `${spacing[1]} ${spacing[2]}`,
+  borderRadius: borderRadius.sm,
+  selectors: {
+    '.dark &': {
+      color: darkColors.error || '#ef4444',
+      backgroundColor: (darkColors.error || '#ef4444') + '30',
+    },
+  },
+})
+
+export const emptyState = style({
+  padding: spacing[8],
+  textAlign: 'center',
+})
