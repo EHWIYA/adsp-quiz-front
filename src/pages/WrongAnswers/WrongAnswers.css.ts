@@ -110,7 +110,7 @@ export const stats = style({
   transition: 'background-color 0.3s ease',
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray800,
+      backgroundColor: darkColors.backgroundSecondary,
     },
   },
 })
@@ -121,7 +121,7 @@ export const statItem = style({
   transition: 'color 0.3s ease',
   selectors: {
     '.dark &': {
-      color: darkColors.textPrimary,
+      color: darkColors.black,
     },
   },
 })
@@ -225,8 +225,10 @@ export const explanation = style({
   transition: 'background-color 0.3s ease, color 0.3s ease',
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.gray800,
-      color: darkColors.textPrimary,
+      backgroundColor: darkColors.backgroundSecondary,
+      borderColor: darkColors.gray700,
+      border: `1px solid ${darkColors.gray700}`,
+      color: darkColors.black,
     },
   },
 })
