@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { colors, darkColors, spacing, borderRadius } from '../../styles/theme'
+import { spacing, borderRadius } from '../../styles/theme'
 
 export const toggleButton = style({
   background: 'transparent',
