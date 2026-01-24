@@ -217,7 +217,7 @@ export const CoreContentRegistration = () => {
           <div className={styles.formGroup}>
             <label className={styles.label}>정보 유형</label>
             <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <label className={styles.radioLabel}>
                 <input
                   type="radio"
                   name="sourceType"
@@ -225,10 +225,11 @@ export const CoreContentRegistration = () => {
                   checked={sourceType === 'text'}
                   onChange={() => setSourceType('text')}
                   disabled={isLoadingCoreContent}
+                  className={styles.radio}
                 />
                 <span>텍스트</span>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <label className={styles.radioLabel}>
                 <input
                   type="radio"
                   name="sourceType"
@@ -236,6 +237,7 @@ export const CoreContentRegistration = () => {
                   checked={sourceType === 'youtube_url'}
                   onChange={() => setSourceType('youtube_url')}
                   disabled={isLoadingCoreContent}
+                  className={styles.radio}
                 />
                 <span>YouTube URL</span>
               </label>

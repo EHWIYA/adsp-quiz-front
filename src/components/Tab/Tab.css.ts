@@ -3,6 +3,7 @@ import { colors, darkColors, typography, spacing, borderRadius } from '../../sty
 
 export const tabContainer = style({
   display: 'flex',
+  justifyContent: 'center',
   gap: spacing[2],
   borderBottom: `2px solid ${colors.gray200}`,
   marginBottom: spacing[6],

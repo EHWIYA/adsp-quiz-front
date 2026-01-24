@@ -14,7 +14,7 @@ export const ThemeToggle = () => {
       onClick={handleToggle} 
       aria-label="테마 전환"
     >
-      {resolvedTheme === 'dark' ? '☀️' : '🌙'}
+      {resolvedTheme === 'dark' ? '🌙' : '☀️'}
     </button>
   )
 }

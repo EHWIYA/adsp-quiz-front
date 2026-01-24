@@ -178,6 +178,48 @@ export const navLinkActive = style({
   },
 })
 
+export const themeToggleButton = style({
+  fontSize: typography.fontSize.base,
+  fontWeight: typography.fontWeight.medium,
+  color: colors.textSecondary,
+  textDecoration: 'none',
+  padding: `${spacing[2]} ${spacing[3]}`,
+  borderRadius: borderRadius.md,
+  transition: 'all 0.2s ease-in-out',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  gap: spacing[2],
+  fontFamily: 'inherit',
+  ':hover': {
+    color: colors.primary,
+    backgroundColor: colors.gray100,
+  },
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+    '.dark &:hover': {
+      color: darkColors.primary,
+      backgroundColor: darkColors.gray700,
+    },
+  },
+  '@media': {
+    [`screen and (max-width: ${breakpoints.md})`]: {
+      width: '100%',
+      textAlign: 'center',
+      padding: spacing[3],
+      justifyContent: 'center',
+    },
+  },
+})
+
+export const themeToggleIcon = style({
+  fontSize: '1.2em',
+})
+
 export const main = style({
   minHeight: 'calc(100vh - 80px)',
 })

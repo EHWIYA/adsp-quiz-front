@@ -9,15 +9,20 @@ import { WrongAnswers } from './pages/WrongAnswers/WrongAnswers'
 import { Admin } from './pages/Admin/Admin'
 import { useThemeStore } from './store/themeStore'
 import { useUIStore } from './store/uiStore'
-import { ThemeToggle } from './components/ThemeToggle/ThemeToggle'
 import { Loading } from './components/Loading/Loading'
 import * as styles from './App.css'
 
 const Navigation = () => {
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { resolvedTheme, toggleTheme } = useThemeStore()
 
   const isActive = (path: string) => location.pathname === path
+
+  const handleThemeToggle = () => {
+    toggleTheme()
+    setIsMenuOpen(false)
+  }
 
   return (
     <nav className={styles.nav}>
@@ -26,7 +31,6 @@ const Navigation = () => {
           ADsP AI Pass
         </Link>
         <div className={styles.navRight}>
-          <ThemeToggle />
           <button
             className={styles.menuButton}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -80,6 +84,16 @@ const Navigation = () => {
           >
             관리
           </Link>
+          <button
+            className={styles.themeToggleButton}
+            onClick={handleThemeToggle}
+            aria-label="테마 전환"
+          >
+            <span className={styles.themeToggleIcon}>
+              {resolvedTheme === 'dark' ? '🌙' : '☀️'}
+            </span>
+            <span>테마 전환</span>
+          </button>
         </div>
       </div>
     </nav>
