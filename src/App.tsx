@@ -1,5 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { 
+  IoHomeOutline, 
+  IoBookOutline, 
+  IoDocumentTextOutline, 
+  IoBookmarkOutline, 
+  IoSettingsOutline, 
+  IoPersonOutline, 
+  IoMoonOutline, 
+  IoSunnyOutline 
+} from 'react-icons/io5'
 import { Home } from './pages/Home/Home'
 import { Training } from './pages/Training/Training'
 import { Exam } from './pages/Exam/Exam'
@@ -14,89 +24,132 @@ import * as styles from './App.css'
 
 const Navigation = () => {
   const location = useLocation()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { resolvedTheme, toggleTheme } = useThemeStore()
 
   const isActive = (path: string) => location.pathname === path
 
-  const handleThemeToggle = () => {
-    toggleTheme()
-    setIsMenuOpen(false)
-  }
-
   return (
-    <nav className={styles.nav}>
-      <div className={styles.navContainer}>
-        <Link to="/" className={styles.logo}>
-          ADsP AI Pass
+    <>
+      <nav className={styles.nav}>
+        <div className={styles.navContainer}>
+          <Link to="/" className={styles.logo}>
+            ADsP AI Pass
+          </Link>
+          <div className={styles.navRight}>
+            <Link
+              to="/mypage"
+              className={`${styles.mypageButton} ${isActive('/mypage') ? styles.mypageButtonActive : ''}`}
+              aria-label="마이페이지"
+            >
+              <IoPersonOutline className={styles.mypageIcon} />
+            </Link>
+            <button
+              className={styles.themeToggleButton}
+              onClick={toggleTheme}
+              aria-label="테마 전환"
+            >
+              {resolvedTheme === 'dark' ? (
+                <IoMoonOutline className={styles.themeToggleIcon} />
+              ) : (
+                <IoSunnyOutline className={styles.themeToggleIcon} />
+              )}
+            </button>
+          </div>
+          <div className={styles.navLinks}>
+            <Link
+              to="/"
+              className={`${styles.navLink} ${isActive('/') ? styles.navLinkActive : ''}`}
+            >
+              홈
+            </Link>
+            <Link
+              to="/training"
+              className={`${styles.navLink} ${isActive('/training') ? styles.navLinkActive : ''}`}
+            >
+              학습 모드
+            </Link>
+            <Link
+              to="/exam"
+              className={`${styles.navLink} ${isActive('/exam') ? styles.navLinkActive : ''}`}
+            >
+              모의고사
+            </Link>
+            <Link
+              to="/mypage"
+              className={`${styles.navLink} ${isActive('/mypage') ? styles.navLinkActive : ''}`}
+            >
+              마이페이지
+            </Link>
+            <Link
+              to="/wrong-answers"
+              className={`${styles.navLink} ${isActive('/wrong-answers') ? styles.navLinkActive : ''}`}
+            >
+              오답노트
+            </Link>
+            <Link
+              to="/admin"
+              className={`${styles.navLink} ${isActive('/admin') ? styles.navLinkActive : ''}`}
+            >
+              관리
+            </Link>
+            <button
+              className={styles.themeToggleButton}
+              onClick={toggleTheme}
+              aria-label="테마 전환"
+            >
+              {resolvedTheme === 'dark' ? (
+                <IoMoonOutline className={styles.themeToggleIcon} />
+              ) : (
+                <IoSunnyOutline className={styles.themeToggleIcon} />
+              )}
+              <span className={styles.themeToggleText}>테마 전환</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+      <nav className={styles.bottomNav}>
+        <Link
+          to="/training"
+          className={`${styles.bottomNavLink} ${isActive('/training') ? styles.bottomNavLinkActive : ''}`}
+          aria-label="학습 모드"
+        >
+          <IoBookOutline className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>학습 모드</span>
         </Link>
-        <div className={styles.navRight}>
-          <button
-            className={styles.menuButton}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="메뉴"
-          >
-            <span className={styles.menuIcon}></span>
-            <span className={styles.menuIcon}></span>
-            <span className={styles.menuIcon}></span>
-          </button>
-        </div>
-        <div className={`${styles.navLinks} ${isMenuOpen ? styles.navLinksOpen : ''}`}>
-          <Link
-            to="/"
-            className={`${styles.navLink} ${isActive('/') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            홈
-          </Link>
-          <Link
-            to="/training"
-            className={`${styles.navLink} ${isActive('/training') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            학습 모드
-          </Link>
-          <Link
-            to="/exam"
-            className={`${styles.navLink} ${isActive('/exam') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            모의고사
-          </Link>
-          <Link
-            to="/mypage"
-            className={`${styles.navLink} ${isActive('/mypage') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            마이페이지
-          </Link>
-          <Link
-            to="/wrong-answers"
-            className={`${styles.navLink} ${isActive('/wrong-answers') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            오답노트
-          </Link>
-          <Link
-            to="/admin"
-            className={`${styles.navLink} ${isActive('/admin') ? styles.navLinkActive : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            관리
-          </Link>
-          <button
-            className={styles.themeToggleButton}
-            onClick={handleThemeToggle}
-            aria-label="테마 전환"
-          >
-            <span className={styles.themeToggleIcon}>
-              {resolvedTheme === 'dark' ? '🌙' : '☀️'}
-            </span>
-            <span>테마 전환</span>
-          </button>
-        </div>
-      </div>
-    </nav>
+        <Link
+          to="/exam"
+          className={`${styles.bottomNavLink} ${isActive('/exam') ? styles.bottomNavLinkActive : ''}`}
+          aria-label="모의고사"
+        >
+          <IoDocumentTextOutline className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>모의고사</span>
+        </Link>
+        <Link
+          to="/"
+          className={`${styles.bottomNavLink} ${isActive('/') ? styles.bottomNavLinkActive : ''}`}
+          aria-label="홈"
+        >
+          <IoHomeOutline className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>홈</span>
+        </Link>
+        <Link
+          to="/wrong-answers"
+          className={`${styles.bottomNavLink} ${isActive('/wrong-answers') ? styles.bottomNavLinkActive : ''}`}
+          aria-label="오답노트"
+        >
+          <IoBookmarkOutline className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>오답노트</span>
+        </Link>
+        <Link
+          to="/admin"
+          className={`${styles.bottomNavLink} ${isActive('/admin') ? styles.bottomNavLinkActive : ''}`}
+          aria-label="관리"
+        >
+          <IoSettingsOutline className={styles.bottomNavIcon} />
+          <span className={styles.bottomNavLabel}>관리</span>
+        </Link>
+      </nav>
+    </>
   )
 }
 

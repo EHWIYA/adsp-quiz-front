@@ -63,38 +63,80 @@ export const logo = style({
   },
 })
 
-export const menuButton = style({
+export const mypageButton = style({
   display: 'none',
-  flexDirection: 'column',
-  gap: '4px',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '40px',
+  height: '40px',
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  padding: spacing[2],
+  borderRadius: borderRadius.md,
+  textDecoration: 'none',
+  transition: 'all 0.2s ease-in-out',
   '@media': {
     [`screen and (max-width: ${breakpoints.md})`]: {
       display: 'flex',
     },
   },
-})
-
-export const menuIcon = style({
-  width: '24px',
-  height: '2px',
-  backgroundColor: colors.textPrimary,
-  borderRadius: '2px',
-  transition: 'all 0.3s ease',
+  ':hover': {
+    backgroundColor: 'transparent',
+  },
+  ':active': {
+    backgroundColor: 'transparent',
+  },
+  ':focus': {
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
   selectors: {
     '.dark &': {
-      backgroundColor: darkColors.textPrimary || '#ffffff',
+      color: darkColors.textSecondary,
+    },
+    '.dark &:hover': {
+      backgroundColor: 'transparent',
+    },
+    '.dark &:active': {
+      backgroundColor: 'transparent',
+    },
+    '.dark &:focus': {
+      backgroundColor: 'transparent',
     },
   },
 })
 
+export const mypageButtonActive = style({
+  backgroundColor: 'transparent',
+  ':hover': {
+    backgroundColor: 'transparent',
+  },
+  selectors: {
+    '.dark &': {
+      backgroundColor: 'transparent',
+    },
+    '.dark &:hover': {
+      backgroundColor: 'transparent',
+    },
+  },
+})
+
+export const mypageIcon = style({
+  fontSize: '1.2em',
+  width: '1.2em',
+  height: '1.2em',
+  color: 'inherit',
+})
+
 export const navRight = style({
-  display: 'flex',
+  display: 'none',
   alignItems: 'center',
   gap: spacing[3],
+  '@media': {
+    [`screen and (max-width: ${breakpoints.md})`]: {
+      display: 'flex',
+    },
+  },
 })
 
 export const navLinks = style({
@@ -103,36 +145,7 @@ export const navLinks = style({
   alignItems: 'center',
   '@media': {
     [`screen and (max-width: ${breakpoints.md})`]: {
-      position: 'absolute',
-      top: '100%',
-      left: 0,
-      right: 0,
-      flexDirection: 'column',
-      backgroundColor: colors.white,
-      borderTop: `1px solid ${colors.gray200}`,
-      boxShadow: shadow.md,
-      padding: spacing[4],
-      gap: spacing[2],
-      transform: 'translateY(-100%)',
-      opacity: 0,
-      visibility: 'hidden',
-      transition: 'all 0.3s ease',
-      selectors: {
-        '.dark &': {
-          backgroundColor: darkColors.backgroundSecondary,
-          borderTopColor: darkColors.gray700,
-        },
-      },
-    },
-  },
-})
-
-export const navLinksOpen = style({
-  '@media': {
-    [`screen and (max-width: ${breakpoints.md})`]: {
-      transform: 'translateY(0)',
-      opacity: 1,
-      visibility: 'visible',
+      display: 'none',
     },
   },
 })
@@ -158,22 +171,23 @@ export const navLink = style({
       backgroundColor: darkColors.gray700,
     },
   },
-  '@media': {
-    [`screen and (max-width: ${breakpoints.md})`]: {
-      width: '100%',
-      textAlign: 'center',
-      padding: spacing[3],
-    },
-  },
 })
 
 export const navLinkActive = style({
   color: colors.primary,
-  backgroundColor: colors.primaryLight + '20',
+  backgroundColor: 'transparent',
+  ':hover': {
+    color: colors.primary,
+    backgroundColor: 'transparent',
+  },
   selectors: {
     '.dark &': {
       color: darkColors.primary,
-      backgroundColor: darkColors.primary + '30',
+      backgroundColor: 'transparent',
+    },
+    '.dark &:hover': {
+      color: darkColors.primary,
+      backgroundColor: 'transparent',
     },
   },
 })
@@ -183,7 +197,7 @@ export const themeToggleButton = style({
   fontWeight: typography.fontWeight.medium,
   color: colors.textSecondary,
   textDecoration: 'none',
-  padding: `${spacing[2]} ${spacing[3]}`,
+  padding: spacing[2],
   borderRadius: borderRadius.md,
   transition: 'all 0.2s ease-in-out',
   background: 'none',
@@ -191,8 +205,112 @@ export const themeToggleButton = style({
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
-  gap: spacing[2],
+  justifyContent: 'center',
+  width: '40px',
+  height: '40px',
   fontFamily: 'inherit',
+  ':hover': {
+    color: colors.primary,
+    backgroundColor: 'transparent',
+  },
+  ':active': {
+    backgroundColor: 'transparent',
+  },
+  ':focus': {
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
+  selectors: {
+    '.dark &': {
+      color: darkColors.textSecondary,
+    },
+    '.dark &:hover': {
+      color: darkColors.primary,
+      backgroundColor: 'transparent',
+    },
+    '.dark &:active': {
+      backgroundColor: 'transparent',
+    },
+    '.dark &:focus': {
+      backgroundColor: 'transparent',
+    },
+  },
+  '@media': {
+    [`screen and (min-width: ${breakpoints.md})`]: {
+      padding: `${spacing[2]} ${spacing[3]}`,
+      width: 'auto',
+      height: 'auto',
+      gap: spacing[2],
+    },
+  },
+})
+
+export const themeToggleIcon = style({
+  fontSize: '1em',
+  width: '1em',
+  height: '1em',
+  color: 'inherit',
+})
+
+export const themeToggleText = style({
+  display: 'none',
+  '@media': {
+    [`screen and (min-width: ${breakpoints.md})`]: {
+      display: 'inline',
+    },
+  },
+})
+
+export const main = style({
+  minHeight: 'calc(100vh - 80px)',
+  '@media': {
+    [`screen and (max-width: ${breakpoints.md})`]: {
+      paddingBottom: '80px',
+    },
+  },
+})
+
+export const bottomNav = style({
+  display: 'none',
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: colors.white,
+  borderTop: `1px solid ${colors.gray200}`,
+  boxShadow: shadow.md,
+  zIndex: 100,
+  '@media': {
+    [`screen and (max-width: ${breakpoints.md})`]: {
+      display: 'flex',
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      padding: `${spacing[2]} 0`,
+      paddingBottom: `calc(${spacing[2]} + env(safe-area-inset-bottom))`,
+    },
+  },
+  selectors: {
+    '.dark &': {
+      backgroundColor: darkColors.backgroundSecondary,
+      borderTopColor: darkColors.gray700,
+    },
+  },
+})
+
+export const bottomNavLink = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: spacing[2],
+  padding: `${spacing[1]} ${spacing[2]}`,
+  textDecoration: 'none',
+  color: colors.textSecondary,
+  borderRadius: borderRadius.md,
+  transition: 'all 0.2s ease-in-out',
+  minWidth: '60px',
+  flex: 1,
+  maxWidth: '100px',
   ':hover': {
     color: colors.primary,
     backgroundColor: colors.gray100,
@@ -206,20 +324,38 @@ export const themeToggleButton = style({
       backgroundColor: darkColors.gray700,
     },
   },
-  '@media': {
-    [`screen and (max-width: ${breakpoints.md})`]: {
-      width: '100%',
-      textAlign: 'center',
-      padding: spacing[3],
-      justifyContent: 'center',
+})
+
+export const bottomNavLinkActive = style({
+  color: colors.primary,
+  backgroundColor: 'transparent',
+  ':hover': {
+    color: colors.primary,
+    backgroundColor: 'transparent',
+  },
+  selectors: {
+    '.dark &': {
+      color: darkColors.primary,
+      backgroundColor: 'transparent',
+    },
+    '.dark &:hover': {
+      color: darkColors.primary,
+      backgroundColor: 'transparent',
     },
   },
 })
 
-export const themeToggleIcon = style({
+export const bottomNavIcon = style({
   fontSize: '1.2em',
+  width: '1.2em',
+  height: '1.2em',
+  lineHeight: 1,
+  color: 'inherit',
 })
 
-export const main = style({
-  minHeight: 'calc(100vh - 80px)',
+export const bottomNavLabel = style({
+  fontSize: typography.fontSize.xs,
+  fontWeight: typography.fontWeight.medium,
+  lineHeight: 1,
+  wordBreak: 'keep-all',
 })
